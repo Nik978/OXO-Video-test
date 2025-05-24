@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>OXO Scheduler - Video</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+    }
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+    #countdown {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: yellow;
+      font-size: 2em;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      font-family: monospace;
+    }
+    #debug {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      color: #0f0;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+  <video id="player" autoplay muted playsinline></video>
+  <div id="countdown" style="display: none;"></div>
+  <div id="debug"></div>
+
+  <script>
+    const version = navigator.userAgent.includes("Mobile") ? "Mobile" : "TV";
+    const basePath = version === "Mobile" ? "Mobile" : "TV";
+
+    const videoMap = {
+      "Bucket": basePath + "/Bucket.mp4",
+      "Cosplay": basePath + "/Cosplay.mp4",
+      "Football": basePath + "/Football.mp4",
+      "Happy": basePath + "/Happy.mp4",
+      "Intro": basePath + "/Intro.mp4",
+      "Recruit": basePath + "/Recruit.mp4",
+    };
+
+    const playlistMap = {
+      "Sun": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Mon": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Tue": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Wed": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Thu": {
+        pre: ["Bucket", "Football", "Bucket", "Happy", "Bucket"],
+        post: ["Intro", "Bucket", "Football", "Bucket", "Happy", "Bucket", "Cosplay", "Bucket", "Recruit"]
+      },
+      "Fri": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Sat": {
+        pre: ["Happy", "Football", "Happy", "Football"],
+        post: ["Football"]
+      }
+    };
+
+    const video = document.getElementById("player");
+    const countdownBox = document.getElementById("countdown");
+    const debugDiv = document.getElementById("debug");
+
+    function getCommercialDay(now) {
+      return (now.getHours() >= 11) ? now.getDay() : (now.getDay() + 6) % 7;
+    }
+
+    function getPlaylist() {
+      const now = new Date();
+      const commercialDay = getCommercialDay(now);
+      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const day = days[commercialDay];
+      const totalMin = now.getHours() * 60 + now.getMinutes();
+
+      if (day === "Sat") {
+        if (totalMin >= 1260 && totalMin < 1440) return ["Football", "Sabato Countdown.mp4"];
+        if (totalMin >= 0 && totalMin < 240) return ["Football"];
+      }
+
+      if (totalMin >= 1110 && totalMin < 1260) return playlistMap[day].pre;
+      return playlistMap[day].post;
+    }
+
+    function handleCountdown() {
+      const now = new Date();
+      const isSaturday = getCommercialDay(now) === 6;
+      const totalMin = now.getHours() * 60 + now.getMinutes();
+
+      if (isSaturday && totalMin >= 1260 && totalMin < 1440) {
+        countdownBox.style.display = "block";
+        setInterval(() => {
+          const now = new Date();
+          const target = new Date();
+          target.setHours(2, 0, 0, 0);
+          if (target < now) target.setDate(target.getDate() + 1);
+          const diff = target - now;
+          if (diff <= 0) {
+            countdownBox.innerText = "MATCH INIZIATO!";
+            return;
+          }
+          const h = Math.floor(diff / 3.6e6);
+          const m = Math.floor((diff % 3.6e6) / 6e4);
+          const s = Math.floor((diff % 6e4) / 1e3);
+          countdownBox.innerText = "Match tra " + h + "h " + m + "m " + s + "s";
+        }, 1000);
+      }
+    }
+
+    let playlist = getPlaylist();
+    let current = 0;
+
+    function updateDebug(fasciaLabel, playlistName) {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      const d = now.getDay();
+      debugDiv.innerHTML = `
+        🕒 Time: ${h}:${m}:${s}<br>
+        📆 Day: ${d} (Sun=0)<br>
+        🎯 Fascia: ${fasciaLabel}<br>
+        📂 Playlist: ${playlistName}<br>
+        💻 Versione: ${version}
+      `;
+    }
+
+    function playNext() {
+      const now = new Date();
+      const totalMin = now.getHours() * 60 + now.getMinutes();
+      let fascia = totalMin >= 1110 && totalMin < 1260 ? "Fascia 1 (18:30–21:00)" : "Fascia 2 (21:00–04:00)";
+      const name = playlist[current % playlist.length];
+      video.src = videoMap[name] || name;
+      video.play();
+      updateDebug(fascia, name);
+      current++;
+    }
+
+    video.onended = playNext;
+    handleCountdown();
+    playNext();
+  </script>
+</body>
+</html>
