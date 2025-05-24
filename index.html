@@ -113,11 +113,21 @@
     let current = 0;
 
     function playNext() {
-      const name = playlist[current % playlist.length];
-      video.src = videoMap[name];
-      video.play();
-      current++;
-    }
+  const name = playlist[current % playlist.length];
+  video.src = videoMap[name];
+  video.play();
+  current++;
+
+  const now = new Date();
+  const totalMin = now.getHours() * 60 + now.getMinutes();
+  let fascia = "";
+
+  if (totalMin >= 1110 && totalMin < 1260) fascia = "Fascia 1 (18:30–21:00)";
+  else fascia = "Fascia 2 (21:00–04:00)";
+
+  updateDebug(fascia, name);
+}
+
 
     video.onended = playNext;
     handleCountdown();
