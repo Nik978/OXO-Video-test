@@ -123,5 +123,34 @@
     handleCountdown();
     playNext();
   </script>
+  <div id="debug" style="
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: #0f0;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 9999;"></div>
+
+<script>
+  const debugDiv = document.getElementById("debug");
+
+  function updateDebug(fasciaLabel, playlistName) {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    const d = now.getDay();
+
+    debugDiv.innerHTML = `
+      🕒 Time: ${h}:${m}:${s}<br>
+      📆 Day: ${d} (Sun=0)<br>
+      🎯 Fascia: ${fasciaLabel}<br>
+      📂 Playlist: ${playlistName}
+    `;
+  }
+</script>
 </body>
 </html>
