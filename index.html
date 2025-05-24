@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Scheduler - Full Playlist</title>
+  <style>
+    body { margin: 0; background: black; overflow: hidden; }
+    video { width: 100vw; height: 100vh; object-fit: cover; }
+    .overlay {
+      position: absolute; bottom: 10px; left: 10px;
+      color: white; font-size: 1.5em; background: rgba(0,0,0,0.5); padding: 10px;
+    }
+    .countdown {
+      position: absolute; top: 10px; right: 10px;
+      color: yellow; font-size: 2em; background: rgba(0,0,0,0.6); padding: 10px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <video id="videoPlayer" autoplay muted></video>
+  <div class="overlay" id="infoBox">Caricamento...</div>
+  <div class="countdown" id="countdownBox" style="display: none;"></div>
+
+  <script>
+    const video = document.getElementById('videoPlayer');
+    const infoBox = document.getElementById('infoBox');
+    const countdownBox = document.getElementById('countdownBox');
+
+    const now = new Date();
+    const day = now.getDay();
+    const hour = now.getHours();
+    const minutes = now.getMinutes();
+    const currentTime = hour * 60 + minutes;
+
+    const fascia1_start = 18 * 60 + 30;
+    const fascia1_end = 21 * 60;
+
+    let playlist = [];
+    let label = "";
+    let enableCountdown = false;
+
+    const loop = (files, labelText, countdown = false) => {
+      let index = 0;
+      playlist = files;
+      label = labelText;
+      enableCountdown = countdown;
+
+      function playNext() {
+        const currentVideo = playlist[index % playlist.length];
+        video.src = currentVideo;
+        infoBox.innerText = "In riproduzione: " + label + " - " + currentVideo;
+        video.play();
+        index++;
+      }
+
+      video.onended = playNext;
+      playNext();
+
+      if (countdown) {
+        countdownBox.style.display = "block";
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+      } else {
+        countdownBox.style.display = "none";
+      }
+    };
+
+    function updateCountdown() {
+      const now = new Date();
+      const target = new Date();
+      target.setHours(2, 0, 0, 0); // 2:00 AM
+
+      const diff = target - now;
+      if (diff <= 0) {
+        countdownBox.innerText = "MATCH INIZIATO!";
+        return;
+      }
+
+      const h = Math.floor(diff / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      countdownBox.innerText = `Countdown match: ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+
+    if (currentTime >= fascia1_start && currentTime < fascia1_end) {
+      if (day >= 0 && day <= 3) {
+        loop(["Happy.mp4", "Football.mp4", "Happy.mp4", "Bucket.mp4"], "Dom-Mer Pre-Show");
+      } else if (day === 4) {
+        loop(["Bucket.mp4", "Football.mp4", "Bucket.mp4", "Happy.mp4", "Bucket.mp4"], "Giovedì Pre-Show");
+      } else if (day === 5) {
+        loop(["Happy.mp4", "Football.mp4", "Happy.mp4", "Bucket.mp4"], "Venerdì Pre-Show");
+      } else if (day === 6) {
+        loop(["Happy.mp4", "Football.mp4", "Happy.mp4", "Football.mp4"], "Sabato Pre-Match");
+      }
+    } else if ((currentTime >= fascia1_end && currentTime <= 1440) || (currentTime < 240)) {
+      if (day >= 0 && day <= 3) {
+        loop(["Intro.mp4", "Football.mp4", "Bucket.mp4", "Happy.mp4", "Football.mp4", "Cosplay.mp4", "Football.mp4", "Recruit.mp4"], "Dom-Mer Notte");
+      } else if (day === 4) {
+        loop(["Intro.mp4", "Bucket.mp4", "Football.mp4", "Bucket.mp4", "Happy.mp4", "Bucket.mp4", "Cosplay.mp4", "Bucket.mp4", "Recruit.mp4"], "Giovedì Notte");
+      } else if (day === 5) {
+        loop(["Intro.mp4", "Football.mp4", "Bucket.mp4", "Happy.mp4", "Football.mp4", "Cosplay.mp4", "Football.mp4", "Recruit.mp4"], "Venerdì Notte");
+      } else if (day === 6) {
+        if (currentTime < 120) {
+          loop(["Football.mp4"], "Sabato Countdown Match", true);
+        } else {
+          loop(["Football.mp4", "Bucket.mp4", "Cosplay.mp4", "Recruit.mp4"], "Sabato Post Match");
+        }
+      }
+    } else {
+      loop(["Intro.mp4", "Football.mp4", "Bucket.mp4", "Recruit.mp4"], "Fuori Orario");
+    }
+  </script>
+</body>
+</html>
