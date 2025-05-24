@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Video Source Comparison</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 40px;
+      color: #6cf;
+    }
+    video {
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 20px;
+      border: 2px solid #666;
+    }
+    .note {
+      font-size: 0.9em;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Comparativo Video</h1>
+
+  <h2>1. Google Drive (Media Risoluzione)</h2>
+  <video controls autoplay muted playsinline>
+    <source src="https://drive.google.com/uc?export=download&id=1F6UHL045U4MUEun-oMNEmQ919Fj4m_F1" type="video/mp4">
+    Il tuo browser non supporta il tag video.
+  </video>
+  <p class="note">Fonte: Google Drive - link diretto con export=download</p>
+
+  <h2>2. GitHub (File da repository pubblico)</h2>
+  <video controls autoplay muted playsinline>
+    <source src="https://nik978.github.io/OXO-Video-test/Mobile/Intro.mp4" type="video/mp4">
+    Il tuo browser non supporta il tag video.
+  </video>
+  <p class="note">Fonte: GitHub Pages - Mobile directory</p>
+
+  <h2>3. Simple HTTP Server (solo in rete locale)</h2>
+  <video controls autoplay muted playsinline>
+    <source src="http://192.168.1.130:8080/Kiosk/Intro.mp4" type="video/mp4">
+    Il tuo browser non supporta il tag video.
+  </video>
+  <p class="note">Fonte: Simple Server - richiede essere sulla stessa rete Wi-Fi</p>
+
+</body>
+</html>
