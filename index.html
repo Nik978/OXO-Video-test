@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>OXO Scheduler - GitHub Video</title>
+  <title>OXO Scheduler - GitHub Video (Smart Mobile Detection)</title>
   <style>
     body {
       margin: 0;
@@ -38,10 +38,10 @@
 <body>
   <video id="player" autoplay muted playsinline></video>
   <div id="countdown" style="display: none;"></div>
-  <div id="debug"></div>
+  <div id="debug">⏳ In attesa del primo video...</div>
 
   <script>
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     const folder = isMobile ? "Mobile" : "TV";
 
     const videoMap = {
@@ -95,7 +95,7 @@
       const min = now.getMinutes();
       const minutes = hour * 60 + min;
 
-      if (minutes >= 1110 && minutes < 1260) return playlistMap[day].pre; // 18:30–21:00
+      if (minutes >= 1110 && minutes < 1260) return playlistMap[day].pre;
       else return playlistMap[day].post;
     }
 
