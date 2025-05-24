@@ -35,31 +35,41 @@ const playlistMap = {
     pre: ["Happy", "Football", "Happy", "Bucket"],
     post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
   },
+  "Mon": {
+    pre: ["Happy", "Football", "Happy", "Bucket"],
+    post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+  },
+  "Tue": {
+    pre: ["Happy", "Football", "Happy", "Bucket"],
+    post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+  },
+  "Wed": {
+    pre: ["Happy", "Football", "Happy", "Bucket"],
+    post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+  },
+  "Thu": {
+    pre: ["Bucket", "Football", "Bucket", "Happy", "Bucket"],
+    post: ["Intro", "Bucket", "Football", "Bucket", "Happy", "Bucket", "Cosplay", "Bucket", "Recruit"]
+  },
+  "Fri": {
+    pre: ["Happy", "Football", "Happy", "Bucket"],
+    post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+  },
   "Sat": {
     pre: ["Happy", "Football", "Happy", "Football"],
-    post: function() {
-      const now = new Date();
-      const mins = now.getHours() * 60 + now.getMinutes();
-      return mins < 120 ? ["Football", "Sabato Countdown"] : ["Football"];
-    }
-  },
-  // altri giorni uguali a "Sun"
-  "Mon": {}, "Tue": {}, "Wed": {}, "Thu": {}, "Fri": {}
+    post: ["Football"]
+  }
 };
-["Mon", "Tue", "Wed", "Thu", "Fri"].forEach(d => playlistMap[d] = playlistMap["Sun"]);
 
 const video = document.getElementById("player");
 const debug = document.getElementById("debug");
 
 function getPlaylist() {
   const now = new Date();
-  const dayName = now.toString().slice(0,3);
+  const day = now.toString().slice(0,3);
   const mins = now.getHours() * 60 + now.getMinutes();
-  return (mins >= 1110 && mins < 1260)
-    ? playlistMap[dayName].pre
-    : typeof playlistMap[dayName].post === "function"
-      ? playlistMap[dayName].post()
-      : playlistMap[dayName].post;
+  if (mins >= 1110 && mins < 1260) return playlistMap[day].pre;
+  return playlistMap[day].post;
 }
 
 function updateDebug(fascia, name) {
