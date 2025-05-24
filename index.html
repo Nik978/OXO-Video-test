@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>OXO Google Drive Scheduler</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+    }
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+    #countdown {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: yellow;
+      font-size: 2em;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <video id="player" autoplay muted playsinline></video>
+  <div id="countdown" style="display: none;"></div>
+
+  <script>
+    const videoMap = {
+      "Bucket": "https://drive.google.com/uc?export=download&id=1w-EppmvRfZYQWD8IfXIA0fLSxKX-Va2B",
+      "Cosplay": "https://drive.google.com/uc?export=download&id=16lgmUBoaeZvUwWsIpkk2KA97v3hoGPwa",
+      "Football": "https://drive.google.com/uc?export=download&id=1cimWj6bOx24MOnKaLqZRTyfwejRSOphe",
+      "Happy": "https://drive.google.com/uc?export=download&id=1Z8HXqG4lLe_gsxFwmOdV0ZOUuYVrbhOb",
+      "Intro": "https://drive.google.com/uc?export=download&id=1F6UHL045U4MUEun-oMNEmQ919Fj4m_F1",
+      "Recruit": "https://drive.google.com/uc?export=download&id=1QC__zznW1Urz6j1oXy28SjVGN6NvaUGw",
+    };
+
+    const playlistMap = {
+      "Sun": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Mon": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Tue": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Wed": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Thu": {
+        pre: ["Bucket", "Football", "Bucket", "Happy", "Bucket"],
+        post: ["Intro", "Bucket", "Football", "Bucket", "Happy", "Bucket", "Cosplay", "Bucket", "Recruit"]
+      },
+      "Fri": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Sat": {
+        pre: ["Happy", "Football", "Happy", "Football"],
+        post: ["Football"]
+      }
+    };
+
+    const video = document.getElementById("player");
+    const countdownBox = document.getElementById("countdown");
+
+    function getPlaylist() {
+      const now = new Date();
+      const day = now.toString().slice(0, 3);
+      const hour = now.getHours();
+      const min = now.getMinutes();
+      const minutes = hour * 60 + min;
+
+      if (minutes >= 1110 && minutes < 1260) return playlistMap[day].pre;
+      else return playlistMap[day].post;
+    }
+
+    function handleCountdown() {
+      const now = new Date();
+      const isSaturday = now.getDay() === 6;
+      const totalMin = now.getHours() * 60 + now.getMinutes();
+
+      if (isSaturday && totalMin >= 1260 && totalMin < 1440) {
+        countdownBox.style.display = "block";
+        setInterval(() => {
+          const now = new Date();
+          const target = new Date();
+          target.setHours(2, 0, 0, 0);
+          if (target < now) target.setDate(target.getDate() + 1);
+          const diff = target - now;
+          if (diff <= 0) {
+            countdownBox.innerText = "MATCH INIZIATO!";
+            return;
+          }
+          const h = Math.floor(diff / 3.6e6);
+          const m = Math.floor((diff % 3.6e6) / 6e4);
+          const s = Math.floor((diff % 6e4) / 1e3);
+          countdownBox.innerText = "Match tra " + h + "h " + m + "m " + s + "s";
+        }, 1000);
+      }
+    }
+
+    let playlist = getPlaylist();
+    let current = 0;
+
+    function playNext() {
+      const name = playlist[current % playlist.length];
+      video.src = videoMap[name];
+      video.play();
+      current++;
+    }
+
+    video.onended = playNext;
+    handleCountdown();
+    playNext();
+  </script>
+</body>
+</html>
