@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>OXO Scheduler</title>
+  <meta charset="UTF-8" />
+  <title>OXO Scheduler - Video Smart Player</title>
   <style>
     body {
       margin: 0;
       background: black;
     }
-    video, iframe {
+    video {
       width: 100vw;
       height: 100vh;
       object-fit: cover;
-      display: block;
     }
     #debug {
       position: fixed;
@@ -22,127 +21,137 @@
       color: #0f0;
       padding: 10px;
       font-family: monospace;
-      font-size: 12px;
+      font-size: 14px;
       z-index: 9999;
     }
   </style>
 </head>
 <body>
+  <video id="player" autoplay muted playsinline></video>
+  <div id="debug"></div>
 
-<video id="player" autoplay muted playsinline></video>
-<div id="debug"></div>
+  <script>
+    const videoEl = document.getElementById("player");
+    const debug = document.getElementById("debug");
 
-<script>
-const debug = document.getElementById("debug");
-const videoEl = document.getElementById("player");
+    const GitHubBase = "https://nik978.github.io/OXO-Video-test/";
+    const LocalBase = "./"; // usa la stessa cartella
+    const DRIVE_ID_MAP = {
+      "Bucket": "1w-EppmvRfZYQWD8IfXIA0fLSxKX-Va2B",
+      "Cosplay": "16lgmUBoaeZvUwWsIpkk2KA97v3hoGPwa",
+      "Football": "1cimWj6bOx24MOnKaLqZRTyfwejRSOphe",
+      "Happy": "1Z8HXqG4lLe_gsxFwmOdV0ZOUuYVrbhOb",
+      "Intro": "1F6UHL045U4MUEun-oMNEmQ919Fj4m_F1",
+      "Recruit": "1QC__zznW1Urz6j1oXy28SjVGN6NvaUGw"
+    };
 
-const DRIVE_ID_MAP = {
-  "Intro":    "1F6UHL045U4MUEun-oMNEmQ919Fj4mF1",
-  "Football": "1cimWj6bOx24MOnKaLqZRTyfwejRSOphe",
-  "Bucket":   "1w-EppmvRfZYQWD8IfXIA0fLSxKX-Va2B",
-  "Happy":    "1Z8HXqG4lLe_gsxFwmOdV0ZOUuYVrbhOb",
-  "Cosplay":  "16lgmUBoaeZvUwWsIpkk2KA97v3hoGPwa",
-  "Recruit":  "1QC__zznW1Urz6j1oXy28SjVGN6NvaUGw"
-};
+    const MODE = "auto"; // può essere: "github", "local", "drive", "auto"
 
-const GitHubBase = "https://nik978.github.io/OXO-Video-test/";
-const LocalBase = "http://127.0.0.1:8080/Download/Kiosk/";
+    function getNowInfo() {
+      const now = new Date();
+      const rawDay = now.getDay();
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      const minutes = hour * 60 + minute;
 
-// 👇 modifica qui per cambiare sorgente
-const MODE = "auto";  // "github" | "drive" | "local" | "auto"
+      const day = minutes < 660 ? (rawDay + 6) % 7 : rawDay; // giorno commerciale (dalle 11 alle 10:59)
 
-function getPlatform() {
-  const w = screen.width;
-  const ua = navigator.userAgent;
-  return (w <= 768 || /Android|iPhone|Mobile/.test(ua)) ? "Mobile" : "TV";
-}
+      return { now, rawDay, day, hour, minute, minutes };
+    }
 
-function getNowInfo() {
-  const now = new Date();
-  let hour = now.getHours(), minute = now.getMinutes();
-  let realDay = now.getDay(); // 0 = Sunday
-  if (hour < 11) realDay = (realDay + 6) % 7; // Commercial day starts at 11:00
-  const minutes = hour * 60 + minute;
-  return { hour, minute, minutes, day: realDay, now };
-}
+    function getFasciaLabel(minutes) {
+      if (minutes >= 1110 && minutes < 1260) return "Fascia 1 (18:30–21:00)";
+      if (minutes >= 1260 || minutes < 120) return "Fascia 2A (21:00–02:00)";
+      if (minutes >= 120 && minutes < 240) return "Fascia 2B (02:00–04:00)";
+      return "Fuori fascia";
+    }
 
-function getFasciaLabel(m) {
-  if (m >= 1110 && m < 1260) return "Fascia 1 (18:30–21:00)";
-  if (m >= 1260 && m < 1440) return "Fascia 2A (21:00–24:00)";
-  if (m >= 0 && m < 120)    return "Fascia 2B (00:00–02:00)";
-  if (m >= 120 && m < 240)  return "Fascia 2C (02:00–04:00)";
-  return "Fuori fascia";
-}
+    const playlistMap = {
+      "Sun": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Mon": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Tue": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Wed": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Thu": {
+        pre: ["Bucket", "Football", "Bucket", "Happy", "Bucket"],
+        post: ["Intro", "Bucket", "Football", "Bucket", "Happy", "Bucket", "Cosplay", "Bucket", "Recruit"]
+      },
+      "Fri": {
+        pre: ["Happy", "Football", "Happy", "Bucket"],
+        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
+      },
+      "Sat": {
+        pre: ["Happy", "Football", "Happy", "Football"],
+        post: ["Football"] // con o senza countdown
+      }
+    };
 
-function getPlaylist(day, m) {
-  if (m >= 1110 && m < 1260) {
-    return (day === 6)
-      ? ["Happy", "Football", "Happy", "Football"]
-      : ["Happy", "Football", "Happy", "Bucket"];
-  } else if (m >= 1260 && m < 1440) {
-    return (day === 6) ? ["Football", "Sabato Countdown"] : 
-                        ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"];
-  } else if (m >= 0 && m < 120) {
-    return (day === 6) ? ["Football"] : 
-                        ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"];
-  } else if (m >= 120 && m < 240) {
-    return ["Football"];
-  } else {
-    return ["Intro"];
-  }
-}
+    function getVideoURL(name) {
+      if (MODE === "github") return GitHubBase + name + ".mp4";
+      if (MODE === "local") return LocalBase + name + ".mp4";
+      if (MODE === "drive") return `https://drive.google.com/uc?export=download&id=${DRIVE_ID_MAP[name]}`;
 
-function getVideoURL(name) {
-  if (MODE === "github") return GitHubBase + name + ".mp4";
-  if (MODE === "local") return LocalBase + name + ".mp4";
-  if (MODE === "drive") return `https://drive.google.com/uc?export=download&id=${DRIVE_ID_MAP[name]}`;
+      if (location.href.startsWith("file://") || location.href.includes("localhost")) {
+        return LocalBase + name + ".mp4";
+      } else if (location.href.includes("github.io")) {
+        return GitHubBase + name + ".mp4";
+      } else {
+        return `https://drive.google.com/uc?export=download&id=${DRIVE_ID_MAP[name]}`;
+      }
+    }
 
-  // AUTO: try local → github → drive
-  if (location.href.startsWith("file://") || location.href.includes("127.0.0.1") || location.href.includes("localhost")) {
-    return LocalBase + name + ".mp4";
-  } else if (location.href.includes("github.io")) {
-    return GitHubBase + name + ".mp4";
-  } else {
-    return `https://drive.google.com/uc?export=download&id=${DRIVE_ID_MAP[name]}`;
-  }
-}
+    function getPlaylistName() {
+      const { day, minutes } = getNowInfo();
+      const dayLabel = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day];
 
-function playVideos(playlist, version) {
-  let i = 0;
+      if (minutes >= 1110 && minutes < 1260) return playlistMap[dayLabel].pre;
+      return playlistMap[dayLabel].post;
+    }
 
-  function playNext() {
-    const videoName = playlist[i % playlist.length];
-    const url = getVideoURL(videoName);
-    videoEl.src = url;
-    videoEl.play();
-    showDebug(videoName, version);
-    i++;
-  }
+    function showDebug(videoName) {
+      const { hour, minute, day, minutes } = getNowInfo();
+      const h = String(hour).padStart(2, '0');
+      const m = String(minute).padStart(2, '0');
+      const dayLabel = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day];
+      const fascia = getFasciaLabel(minutes);
+      const src = videoEl.src.includes("github.io") ? "GitHub" :
+                  videoEl.src.includes("googleusercontent") ? "Drive" :
+                  videoEl.src.includes("localhost") ? "Localhost" :
+                  videoEl.src.includes("file://") ? "Locale" : "Altro";
 
-  videoEl.onended = playNext;
-  playNext();
-}
+      debug.innerHTML = `
+        🕒 Time: ${h}:${m}<br>
+        📆 Day: ${day} (${dayLabel}=0)<br>
+        🎯 Fascia: ${fascia}<br>
+        📂 Playlist: ${videoName}<br>
+        🌍 Sorgente: ${src}
+      `;
+    }
 
-function showDebug(videoName, version) {
-  const { hour, minute, now, day, minutes } = getNowInfo();
-  const dayLabel = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day];
-  const fascia = getFasciaLabel(minutes);
+    let playlist = getPlaylistName();
+    let current = 0;
 
-  debug.innerHTML = `
-    🕒 Time: ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}<br>
-    📆 Day: ${day} (${dayLabel}=0)<br>
-    🎯 Fascia: ${fascia}<br>
-    📂 Playlist: ${videoName}<br>
-    📱 Versione: ${version}
-  `;
-}
+    function playNext() {
+      const name = playlist[current % playlist.length];
+      videoEl.src = getVideoURL(name);
+      videoEl.play();
+      showDebug(name);
+      current++;
+    }
 
-// Init
-const { day, minutes } = getNowInfo();
-const version = getPlatform();
-const playlist = getPlaylist(day, minutes);
-playVideos(playlist, version);
-</script>
-
+    videoEl.onended = playNext;
+    playNext();
+  </script>
 </body>
 </html>
