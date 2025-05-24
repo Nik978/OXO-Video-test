@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>OXO Scheduler - GitHub Video (Smart Mobile Detection)</title>
+  <title>OXO Scheduler - Device Test</title>
   <style>
     body {
       margin: 0;
@@ -13,153 +13,29 @@
       height: 100vh;
       object-fit: cover;
     }
-    #countdown, #debug {
+    #deviceType {
       position: absolute;
-      z-index: 9999;
-      font-family: monospace;
+      top: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
       padding: 10px;
-    }
-    #countdown {
-      top: 10px;
-      right: 10px;
-      color: yellow;
-      font-size: 2em;
-      background: rgba(0,0,0,0.6);
-    }
-    #debug {
-      bottom: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.7);
-      color: #0f0;
-      font-size: 12px;
+      font-size: 16px;
+      font-family: monospace;
+      z-index: 9999;
     }
   </style>
 </head>
 <body>
-  <video id="player" autoplay muted playsinline></video>
-  <div id="countdown" style="display: none;"></div>
-  <div id="debug">⏳ In attesa del primo video...</div>
-
+  <div id="deviceType">Rilevamento dispositivo...</div>
   <script>
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    const folder = isMobile ? "Mobile" : "TV";
-
-    const videoMap = {
-      "Bucket": `https://nik978.github.io/OXO-Video-test/${folder}/Bucket.mp4`,
-      "Cosplay": `https://nik978.github.io/OXO-Video-test/${folder}/Cosplay.mp4`,
-      "Football": `https://nik978.github.io/OXO-Video-test/${folder}/Football.mp4`,
-      "Happy": `https://nik978.github.io/OXO-Video-test/${folder}/Happy.mp4`,
-      "Intro": `https://nik978.github.io/OXO-Video-test/${folder}/Intro.mp4`,
-      "Recruit": `https://nik978.github.io/OXO-Video-test/${folder}/Recruit.mp4`
-    };
-
-    const playlistMap = {
-      "Sun": {
-        pre: ["Happy", "Football", "Happy", "Bucket"],
-        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
-      },
-      "Mon": {
-        pre: ["Happy", "Football", "Happy", "Bucket"],
-        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
-      },
-      "Tue": {
-        pre: ["Happy", "Football", "Happy", "Bucket"],
-        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
-      },
-      "Wed": {
-        pre: ["Happy", "Football", "Happy", "Bucket"],
-        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
-      },
-      "Thu": {
-        pre: ["Bucket", "Football", "Bucket", "Happy", "Bucket"],
-        post: ["Intro", "Bucket", "Football", "Bucket", "Happy", "Bucket", "Cosplay", "Bucket", "Recruit"]
-      },
-      "Fri": {
-        pre: ["Happy", "Football", "Happy", "Bucket"],
-        post: ["Intro", "Football", "Bucket", "Happy", "Football", "Cosplay", "Football", "Recruit"]
-      },
-      "Sat": {
-        pre: ["Happy", "Football", "Happy", "Football"],
-        post: ["Football"]
-      }
-    };
-
-    const video = document.getElementById("player");
-    const countdownBox = document.getElementById("countdown");
-    const debugDiv = document.getElementById("debug");
-
-    function getPlaylist() {
-      const now = new Date();
-      const day = now.toString().slice(0, 3);
-      const hour = now.getHours();
-      const min = now.getMinutes();
-      const minutes = hour * 60 + min;
-
-      if (minutes >= 1110 && minutes < 1260) return playlistMap[day].pre;
-      else return playlistMap[day].post;
+    const deviceType = document.getElementById("deviceType");
+    if (isMobile) {
+      deviceType.innerText = "🟢 Dispositivo rilevato: Mobile";
+    } else {
+      deviceType.innerText = "🔵 Dispositivo rilevato: Desktop / TV";
     }
-
-    function handleCountdown() {
-      const now = new Date();
-      const isSaturday = now.getDay() === 6;
-      const totalMin = now.getHours() * 60 + now.getMinutes();
-
-      if (isSaturday && totalMin >= 1260 && totalMin < 1440) {
-        countdownBox.style.display = "block";
-        setInterval(() => {
-          const now = new Date();
-          const target = new Date();
-          target.setHours(2, 0, 0, 0);
-          if (target < now) target.setDate(target.getDate() + 1);
-          const diff = target - now;
-          if (diff <= 0) {
-            countdownBox.innerText = "MATCH INIZIATO!";
-            return;
-          }
-          const h = Math.floor(diff / 3.6e6);
-          const m = Math.floor((diff % 3.6e6) / 6e4);
-          const s = Math.floor((diff % 6e4) / 1e3);
-          countdownBox.innerText = "Match tra " + h + "h " + m + "m " + s + "s";
-        }, 1000);
-      }
-    }
-
-    function updateDebug(fasciaLabel, playlistName) {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      const d = now.getDay();
-      debugDiv.innerHTML = `
-        🕒 Time: ${h}:${m}:${s}<br>
-        📆 Day: ${d} (Sun=0)<br>
-        🎯 Fascia: ${fasciaLabel}<br>
-        📂 Playlist: ${playlistName}
-      `;
-    }
-
-    let playlist = getPlaylist();
-    let current = 0;
-
-    function playNext() {
-      const name = playlist[current % playlist.length];
-      video.src = videoMap[name];
-      video.play();
-      current++;
-
-      const now = new Date();
-      const totalMin = now.getHours() * 60 + now.getMinutes();
-      let fascia = "";
-
-      if (totalMin >= 1110 && totalMin < 1260) fascia = "Fascia 1 (18:30–21:00)";
-      else fascia = "Fascia 2 (21:00–04:00)";
-
-      updateDebug(fascia, name);
-    }
-
-    video.onended = playNext;
-    handleCountdown();
-    playNext();
   </script>
 </body>
 </html>
