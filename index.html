@@ -148,18 +148,22 @@
   const debugDiv = document.getElementById("debug");
 
   function updateDebug(fasciaLabel, playlistName) {
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-    const d = now.getDay();
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  const d = now.getDay();
 
-    debugDiv.innerHTML = `
-      🕒 Time: ${h}:${m}:${s}<br>
-      📆 Day: ${d} (Sun=0)<br>
-      🎯 Fascia: ${fasciaLabel}<br>
-      📂 Playlist: ${playlistName}
-    `;
+  debugDiv.innerHTML = `
+    🕒 Time: ${h}:${m}:${s}<br>
+    📆 Day: ${d} (Sun=0)<br>
+    🎯 Fascia: ${fasciaLabel}<br>
+    📂 Playlist: ${playlistName}
+  `;
+
+  console.log("Debug updated:", fasciaLabel, playlistName);
+}
+
   }
 </script>
 </body>
