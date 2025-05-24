@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>OXO Google Drive Scheduler</title>
+  <title>OXO Scheduler - GitHub Video</title>
   <style>
     body {
       margin: 0;
@@ -31,12 +31,12 @@
 
   <script>
     const videoMap = {
-      "Bucket": "https://drive.google.com/uc?export=download&id=1w-EppmvRfZYQWD8IfXIA0fLSxKX-Va2B",
-      "Cosplay": "https://drive.google.com/uc?export=download&id=16lgmUBoaeZvUwWsIpkk2KA97v3hoGPwa",
-      "Football": "https://drive.google.com/uc?export=download&id=1cimWj6bOx24MOnKaLqZRTyfwejRSOphe",
-      "Happy": "https://drive.google.com/uc?export=download&id=1Z8HXqG4lLe_gsxFwmOdV0ZOUuYVrbhOb",
-      "Intro": "https://drive.google.com/uc?export=download&id=1F6UHL045U4MUEun-oMNEmQ919Fj4m_F1",
-      "Recruit": "https://drive.google.com/uc?export=download&id=1QC__zznW1Urz6j1oXy28SjVGN6NvaUGw",
+      "Bucket": "https://nik978.github.io/OXO-Video-test/Bucket.mp4",
+      "Cosplay": "https://nik978.github.io/OXO-Video-test/Cosplay.mp4",
+      "Football": "https://nik978.github.io/OXO-Video-test/Football.mp4",
+      "Happy": "https://nik978.github.io/OXO-Video-test/Happy.mp4",
+      "Intro": "https://nik978.github.io/OXO-Video-test/Intro.mp4",
+      "Recruit": "https://nik978.github.io/OXO-Video-test/Recruit.mp4",
     };
 
     const playlistMap = {
@@ -80,7 +80,7 @@
       const min = now.getMinutes();
       const minutes = hour * 60 + min;
 
-      if (minutes >= 1110 && minutes < 1260) return playlistMap[day].pre;
+      if (minutes >= 1110 && minutes < 1260) return playlistMap[day].pre; // 18:30–21:00
       else return playlistMap[day].post;
     }
 
