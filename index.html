@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>OXO Scheduler - GitHub Video</title>
+  <title>OXO Scheduler - GitHub Video (Mobile/Desktop)</title>
   <style>
     body {
       margin: 0;
@@ -44,13 +44,18 @@
   <div id="debug">⏳ In attesa del primo video...</div>
 
   <script>
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    const basePath = isMobile
+      ? "https://nik978.github.io/OXO-Video-test/mobile/"
+      : "https://nik978.github.io/OXO-Video-test/desktop/";
+
     const videoMap = {
-      "Bucket": "https://nik978.github.io/OXO-Video-test/Bucket.mp4",
-      "Cosplay": "https://nik978.github.io/OXO-Video-test/Cosplay.mp4",
-      "Football": "https://nik978.github.io/OXO-Video-test/Football.mp4",
-      "Happy": "https://nik978.github.io/OXO-Video-test/Happy.mp4",
-      "Intro": "https://nik978.github.io/OXO-Video-test/Intro.mp4",
-      "Recruit": "https://nik978.github.io/OXO-Video-test/Recruit.mp4"
+      "Bucket": basePath + "Bucket.mp4",
+      "Cosplay": basePath + "Cosplay.mp4",
+      "Football": basePath + "Football.mp4",
+      "Happy": basePath + "Happy.mp4",
+      "Intro": basePath + "Intro.mp4",
+      "Recruit": basePath + "Recruit.mp4"
     };
 
     const playlistMap = {
