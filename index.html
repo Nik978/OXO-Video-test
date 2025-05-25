@@ -1,53 +1,19 @@
 
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OXO Video Scheduler</title>
+  <title>OXO Smart Video Scheduler</title>
   <style>
-    body {
-      margin: 0;
-      background: black;
-      overflow: hidden;
-    }
-    video {
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      display: none;
-    }
-    #logo {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      max-width: 80vw;
-      max-height: 80vh;
-      display: none;
-    }
-    #countdown {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: yellow;
-      font-size: 2em;
-      background: rgba(0,0,0,0.6);
-      padding: 10px;
-      font-family: monospace;
-      display: none;
-      z-index: 1000;
-    }
-    #debug {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.7);
-      color: #0f0;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 12px;
-      z-index: 9999;
-    }
+    body { margin: 0; background: black; overflow: hidden; }
+    video { width: 100vw; height: 100vh; object-fit: cover; display: none; }
+    #logo { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            max-width: 80vw; max-height: 80vh; display: none; }
+    #countdown { position: absolute; top: 10px; right: 10px; color: yellow; font-size: 2em;
+                 background: rgba(0,0,0,0.6); padding: 10px; font-family: monospace;
+                 display: none; z-index: 1000; }
+    #debug { position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #0f0;
+             padding: 10px; font-family: monospace; font-size: 12px; z-index: 9999; }
   </style>
 </head>
 <body>
@@ -58,36 +24,45 @@
 
   <script>
     const isMobile = /Android|iPhone/i.test(navigator.userAgent);
-    const versione = isMobile ? "Mobile" : "TV";
-    const basePath = `https://nik978.github.io/OXO-Video-test/${versione}/`;
+    const version = isMobile ? "Mobile" : "TV";
+    const basePath = `https://nik978.github.io/OXO-Video-test/${version}/`;
 
-    const videoMap = {
-      "Bucket": basePath + "Bucket.mp4",
-      "Cosplay": basePath + "Cosplay.mp4",
-      "Football": basePath + "Football.mp4",
-      "Happy": basePath + "Happy.mp4",
-      "Intro": basePath + "Intro.mp4",
-      "Recruit": basePath + "Recruit.mp4"
-    };
     const logoUrl = basePath + "logo.png";
 
-    const playlist = [
-      "Happy", "Football", "Happy", "Bucket",
-      "Intro", "Football", "Bucket", "Happy",
-      "Football", "Cosplay", "Football", "Recruit"
-    ];
+    const contentMap = {
+      "Happy_Hour": ["Happy.mp4"],
+      "Evening_Block_2": ["Football.mp4", "Cosplay.mp4"],
+      "Late_Block": ["Recruit.mp4", "Bucket.mp4"]
+    };
+
+    const weekdayMap = {
+      1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday",
+      5: "Friday", 6: "Saturday", 7: "Sunday"
+    };
 
     let current = 0;
     let countdownTimer;
+
     const video = document.getElementById("player");
     const logo = document.getElementById("logo");
     const countdownBox = document.getElementById("countdown");
     const debugDiv = document.getElementById("debug");
 
-    function isHappyCountdownActive() {
-      const now = new Date();
-      const h = now.getHours();
-      return (h >= 19 && h < 21);
+    function getSection(min) {
+      if (min >= 1140 && min < 1260) return "Happy_Hour";        // 19:00–21:00
+      if (min >= 1110 && min < 1140) return "Evening_Block_1";   // 18:30–19:00
+      if (min >= 1260 || min < 120) return "Evening_Block_2";    // 21:00–02:00
+      if (min >= 120 && min < 300) return "Late_Block";          // 02:00–05:00
+      return "Closed";                                           // 05:00–18:30
+    }
+
+    function getDayNumber() {
+      let d = new Date().getDay();
+      return d === 0 ? 7 : d; // Sunday = 7
+    }
+
+    function isCountdownActive(min) {
+      return min >= 1140 && min < 1260; // only 19:00–21:00
     }
 
     function updateCountdown() {
@@ -106,62 +81,50 @@
       const h = Math.floor(diff / 3.6e6);
       const m = Math.floor((diff % 3.6e6) / 6e4);
       const s = Math.floor((diff % 6e4) / 1e3);
-      countdownBox.innerText = `Match tra ${h}h ${m}m ${s}s`;
+      countdownBox.innerText = `Match starts in ${h}h ${m}m ${s}s`;
     }
 
-    function updateDebug(fascia, videoName, versione) {
+    function updateDebug(day, section, name) {
       const now = new Date();
       const h = String(now.getHours()).padStart(2, "0");
       const m = String(now.getMinutes()).padStart(2, "0");
       const s = String(now.getSeconds()).padStart(2, "0");
-      const d = now.getDay();
+
       debugDiv.innerHTML = `
         🕒 Time: ${h}:${m}:${s}<br>
-        📆 Day: ${d} (Sun=0)<br>
-        🔁 Fascia: ${fascia}<br>
-        🎞️ Playlist: ${videoName}<br>
-        📱 Versione: ${versione}
+        📆 Day: ${weekdayMap[day]} (${day})<br>
+        🔁 Section: ${section}<br>
+        🎞️ Now Playing: ${name}<br>
+        📱 Version: ${version}
       `;
     }
 
     function playNext() {
       const now = new Date();
-      const hour = now.getHours();
-      const minute = now.getMinutes();
-      const totalMin = hour * 60 + minute;
+      const minutes = now.getHours() * 60 + now.getMinutes();
+      const section = getSection(minutes);
+      const day = getDayNumber();
 
-      let fasciaLabel = "";
-      let fasciaAttiva = false;
-
-      if (totalMin >= 1110 && totalMin < 1260) {
-        fasciaAttiva = true;
-        fasciaLabel = "Attivo (18:30–21:00)";
-      } else if (totalMin >= 1260 || totalMin < 300) {
-        fasciaAttiva = true;
-        fasciaLabel = "Attivo (21:00–05:00)";
-      } else {
-        fasciaAttiva = false;
-        fasciaLabel = "Spento (05:00–18:30)";
-      }
-
-      if (!fasciaAttiva) {
+      if (section === "Closed") {
         video.style.display = "none";
         video.pause();
         logo.style.display = "block";
         logo.src = logoUrl;
-        updateDebug(fasciaLabel, "-", versione);
+        updateDebug(day, section, "-");
         return;
       }
 
-      logo.style.display = "none";
+      const playlist = contentMap[section] || [];
       const name = playlist[current % playlist.length];
-      const src = videoMap[name];
+      const src = basePath + name;
+
       video.src = src;
       video.style.display = "block";
+      logo.style.display = "none";
       video.play();
-      updateDebug(fasciaLabel, name, versione);
+      updateDebug(day, section, name);
 
-      if (name === "Happy" && isHappyCountdownActive()) {
+      if (section === "Happy_Hour" && isCountdownActive(minutes)) {
         countdownBox.style.display = "block";
         updateCountdown();
         countdownTimer = setInterval(updateCountdown, 1000);
