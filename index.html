@@ -1,17 +1,29 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>OXO Video Scheduler (TEST FORZATO)</title>
+  <title>OXO Video Scheduler</title>
   <style>
     body {
       margin: 0;
       background: black;
+      overflow: hidden;
     }
     video {
       width: 100vw;
       height: 100vh;
       object-fit: cover;
+      display: none;
+    }
+    #logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 80vw;
+      max-height: 80vh;
+      display: none;
     }
     #countdown {
       position: absolute;
@@ -23,6 +35,7 @@
       padding: 10px;
       font-family: monospace;
       display: none;
+      z-index: 1000;
     }
     #debug {
       position: fixed;
@@ -39,27 +52,24 @@
 </head>
 <body>
   <video id="player" autoplay muted playsinline></video>
+  <img id="logo" src="" alt="OXO Logo">
   <div id="countdown"></div>
   <div id="debug"></div>
 
   <script>
-    const video = document.getElementById("player");
-    const countdownBox = document.getElementById("countdown");
-    const debugDiv = document.getElementById("debug");
-
     const isMobile = /Android|iPhone/i.test(navigator.userAgent);
     const versione = isMobile ? "Mobile" : "TV";
+    const basePath = `https://nik978.github.io/OXO-Video-test/${versione}/`;
 
-    const videoPath = isMobile ? "Mobile/" : "TV/";
     const videoMap = {
-      "Bucket": `https://nik978.github.io/OXO-Video-test/${videoPath}Bucket.mp4`,
-      "Cosplay": `https://nik978.github.io/OXO-Video-test/${videoPath}Cosplay.mp4`,
-      "Football": `https://nik978.github.io/OXO-Video-test/${videoPath}Football.mp4`,
-      "Happy": `https://nik978.github.io/OXO-Video-test/${videoPath}Happy.mp4`,
-      "Intro": `https://nik978.github.io/OXO-Video-test/${videoPath}Intro.mp4`,
-      "Recruit": `https://nik978.github.io/OXO-Video-test/${videoPath}Recruit.mp4`,
-      "Logo": `https://nik978.github.io/OXO-Video-test/${videoPath}logo.png`
+      "Bucket": basePath + "Bucket.mp4",
+      "Cosplay": basePath + "Cosplay.mp4",
+      "Football": basePath + "Football.mp4",
+      "Happy": basePath + "Happy.mp4",
+      "Intro": basePath + "Intro.mp4",
+      "Recruit": basePath + "Recruit.mp4"
     };
+    const logoUrl = basePath + "logo.png";
 
     const playlist = [
       "Happy", "Football", "Happy", "Bucket",
@@ -68,43 +78,16 @@
     ];
 
     let current = 0;
+    let countdownTimer;
+    const video = document.getElementById("player");
+    const logo = document.getElementById("logo");
+    const countdownBox = document.getElementById("countdown");
+    const debugDiv = document.getElementById("debug");
 
     function isHappyCountdownActive() {
       const now = new Date();
       const h = now.getHours();
       return (h >= 19 && h < 21);
-    }
-
-    function playNext() {
-      const name = playlist[current % playlist.length];
-      current++;
-
-      const now = new Date();
-      const h = now.getHours();
-      const fasciaAttiva = true; // FORZATO per test
-
-      if (!fasciaAttiva) {
-        video.src = videoMap["Logo"];
-        video.removeAttribute("autoplay");
-        video.pause();
-        updateDebug("Spento", "-", versione);
-        return;
-      }
-
-      const src = videoMap[name];
-      video.src = src;
-      video.play();
-
-      if (name === "Happy" && isHappyCountdownActive()) {
-        countdownBox.style.display = "block";
-        updateCountdown(); // avvia subito
-        countdownTimer = setInterval(updateCountdown, 1000);
-      } else {
-        countdownBox.style.display = "none";
-        clearInterval(countdownTimer);
-      }
-
-      updateDebug("Attivo", name, versione);
     }
 
     function updateCountdown() {
@@ -141,8 +124,41 @@
       `;
     }
 
+    function playNext() {
+      const now = new Date();
+      const totalMin = now.getHours() * 60 + now.getMinutes();
+      const fasciaAttiva = totalMin >= 1080 || totalMin < 300; // 18:00–05:00
+
+      if (!fasciaAttiva) {
+        video.style.display = "none";
+        video.pause();
+        logo.style.display = "block";
+        logo.src = logoUrl;
+        updateDebug("Spento", "-", versione);
+        return;
+      }
+
+      logo.style.display = "none";
+      const name = playlist[current % playlist.length];
+      const src = videoMap[name];
+      video.src = src;
+      video.style.display = "block";
+      video.play();
+      updateDebug("Attivo", name, versione);
+
+      if (name === "Happy" && isHappyCountdownActive()) {
+        countdownBox.style.display = "block";
+        updateCountdown();
+        countdownTimer = setInterval(updateCountdown, 1000);
+      } else {
+        countdownBox.style.display = "none";
+        clearInterval(countdownTimer);
+      }
+
+      current++;
+    }
+
     video.onended = playNext;
-    let countdownTimer;
     playNext();
   </script>
 </body>
