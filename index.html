@@ -1,6 +1,149 @@
-
 <!DOCTYPE html>
 <html lang="it">
->
-<!-- TRUNCATED TO FIT ANSWER -->
+<head>
+  <meta charset="UTF-8" />
+  <title>OXO Video Scheduler (TEST FORZATO)</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+    }
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+    #countdown {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: yellow;
+      font-size: 2em;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      font-family: monospace;
+      display: none;
+    }
+    #debug {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      color: #0f0;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+  <video id="player" autoplay muted playsinline></video>
+  <div id="countdown"></div>
+  <div id="debug"></div>
+
+  <script>
+    const video = document.getElementById("player");
+    const countdownBox = document.getElementById("countdown");
+    const debugDiv = document.getElementById("debug");
+
+    const isMobile = /Android|iPhone/i.test(navigator.userAgent);
+    const versione = isMobile ? "Mobile" : "TV";
+
+    const videoPath = isMobile ? "Mobile/" : "TV/";
+    const videoMap = {
+      "Bucket": `https://nik978.github.io/OXO-Video-test/${videoPath}Bucket.mp4`,
+      "Cosplay": `https://nik978.github.io/OXO-Video-test/${videoPath}Cosplay.mp4`,
+      "Football": `https://nik978.github.io/OXO-Video-test/${videoPath}Football.mp4`,
+      "Happy": `https://nik978.github.io/OXO-Video-test/${videoPath}Happy.mp4`,
+      "Intro": `https://nik978.github.io/OXO-Video-test/${videoPath}Intro.mp4`,
+      "Recruit": `https://nik978.github.io/OXO-Video-test/${videoPath}Recruit.mp4`,
+      "Logo": `https://nik978.github.io/OXO-Video-test/${videoPath}logo.png`
+    };
+
+    const playlist = [
+      "Happy", "Football", "Happy", "Bucket",
+      "Intro", "Football", "Bucket", "Happy",
+      "Football", "Cosplay", "Football", "Recruit"
+    ];
+
+    let current = 0;
+
+    function isHappyCountdownActive() {
+      const now = new Date();
+      const h = now.getHours();
+      return (h >= 19 && h < 21);
+    }
+
+    function playNext() {
+      const name = playlist[current % playlist.length];
+      current++;
+
+      const now = new Date();
+      const h = now.getHours();
+      const fasciaAttiva = true; // FORZATO per test
+
+      if (!fasciaAttiva) {
+        video.src = videoMap["Logo"];
+        video.removeAttribute("autoplay");
+        video.pause();
+        updateDebug("Spento", "-", versione);
+        return;
+      }
+
+      const src = videoMap[name];
+      video.src = src;
+      video.play();
+
+      if (name === "Happy" && isHappyCountdownActive()) {
+        countdownBox.style.display = "block";
+        updateCountdown(); // avvia subito
+        countdownTimer = setInterval(updateCountdown, 1000);
+      } else {
+        countdownBox.style.display = "none";
+        clearInterval(countdownTimer);
+      }
+
+      updateDebug("Attivo", name, versione);
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const target = new Date();
+      target.setHours(21, 0, 0, 0);
+      if (target < now) target.setDate(target.getDate() + 1);
+      const diff = target - now;
+
+      if (diff <= 0) {
+        countdownBox.style.display = "none";
+        clearInterval(countdownTimer);
+        return;
+      }
+
+      const h = Math.floor(diff / 3.6e6);
+      const m = Math.floor((diff % 3.6e6) / 6e4);
+      const s = Math.floor((diff % 6e4) / 1e3);
+      countdownBox.innerText = `Match tra ${h}h ${m}m ${s}s`;
+    }
+
+    function updateDebug(fascia, videoName, versione) {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+      const d = now.getDay();
+      debugDiv.innerHTML = `
+        🕒 Time: ${h}:${m}:${s}<br>
+        📆 Day: ${d} (Sun=0)<br>
+        🔁 Fascia: ${fascia}<br>
+        🎞️ Playlist: ${videoName}<br>
+        📱 Versione: ${versione}
+      `;
+    }
+
+    video.onended = playNext;
+    let countdownTimer;
+    playNext();
+  </script>
+</body>
 </html>
