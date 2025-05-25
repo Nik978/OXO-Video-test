@@ -26,43 +26,55 @@
     const isMobile = /Android|iPhone/i.test(navigator.userAgent);
     const version = isMobile ? "Mobile" : "TV";
     const basePath = `https://nik978.github.io/OXO-Video-test/${version}/`;
-
     const logoUrl = basePath + "logo.png";
-
-    const contentMap = {
-      "Happy_Hour": ["Happy.mp4"],
-      "Evening_Block_2": ["Football.mp4", "Cosplay.mp4"],
-      "Late_Block": ["Recruit.mp4", "Bucket.mp4"]
-    };
 
     const weekdayMap = {
       1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday",
       5: "Friday", 6: "Saturday", 7: "Sunday"
     };
 
-    let current = 0;
-    let countdownTimer;
+    const playlists = {
+      "default": {
+        "Evening_Block_1": ["Intro.mp4"],
+        "Evening_Block_2": ["Football.mp4", "Promo.mp4"],
+        "Late_Block": ["Recruit.mp4", "Bucket.mp4"]
+      },
+      "4": {
+        "Evening_Block_1": ["Bucket.mp4"],
+        "Evening_Block_2": ["Bucket.mp4", "Football.mp4"],
+        "Late_Block": ["Recruit.mp4", "Bucket.mp4"]
+      },
+      "6": {
+        "Evening_Block_1": ["Cosplay.mp4"],
+        "Evening_Block_2": ["Football.mp4", "Cosplay.mp4"],
+        "Late_Block": ["Cosplay.mp4", "Recruit.mp4"]
+      }
+    };
 
     const video = document.getElementById("player");
     const logo = document.getElementById("logo");
     const countdownBox = document.getElementById("countdown");
     const debugDiv = document.getElementById("debug");
+    let current = 0;
+    let countdownTimer;
 
-    function getSection(min) {
-      if (min >= 1140 && min < 1260) return "Happy_Hour";        // 19:00–21:00
-      if (min >= 1110 && min < 1140) return "Evening_Block_1";   // 18:30–19:00
-      if (min >= 1260 || min < 120) return "Evening_Block_2";    // 21:00–02:00
-      if (min >= 120 && min < 300) return "Late_Block";          // 02:00–05:00
-      return "Closed";                                           // 05:00–18:30
+    function getDayNumberCommercial() {
+      const now = new Date();
+      now.setHours(now.getHours() - 5);
+      const d = now.getDay();
+      return d === 0 ? 7 : d;
     }
 
-    function getDayNumber() {
-      let d = new Date().getDay();
-      return d === 0 ? 7 : d; // Sunday = 7
+    function getSection(min) {
+      if (min >= 1140 && min < 1260) return "Happy_Hour";
+      if (min >= 1110 && min < 1140) return "Evening_Block_1";
+      if (min >= 1260 || min < 120) return "Evening_Block_2";
+      if (min >= 120 && min < 300) return "Late_Block";
+      return "Closed";
     }
 
     function isCountdownActive(min) {
-      return min >= 1140 && min < 1260; // only 19:00–21:00
+      return min >= 1140 && min < 1260;
     }
 
     function updateCountdown() {
@@ -81,7 +93,7 @@
       const h = Math.floor(diff / 3.6e6);
       const m = Math.floor((diff % 3.6e6) / 6e4);
       const s = Math.floor((diff % 6e4) / 1e3);
-      countdownBox.innerText = `Match starts in ${h}h ${m}m ${s}s`;
+      countdownBox.innerText = `Countdown: ${h}h ${m}m ${s}s`;
     }
 
     function updateDebug(day, section, name) {
@@ -103,7 +115,7 @@
       const now = new Date();
       const minutes = now.getHours() * 60 + now.getMinutes();
       const section = getSection(minutes);
-      const day = getDayNumber();
+      const day = getDayNumberCommercial();
 
       if (section === "Closed") {
         video.style.display = "none";
@@ -114,14 +126,19 @@
         return;
       }
 
-      const playlist = contentMap[section] || [];
-      const name = playlist[current % playlist.length];
-      const src = basePath + name;
+      let name = "Happy.mp4";
+      if (section !== "Happy_Hour") {
+        const todayPlaylist = playlists[day] || playlists["default"];
+        const list = todayPlaylist[section] || [];
+        name = list[current % list.length];
+      }
 
+      const src = basePath + name;
       video.src = src;
       video.style.display = "block";
       logo.style.display = "none";
       video.play();
+
       updateDebug(day, section, name);
 
       if (section === "Happy_Hour" && isCountdownActive(minutes)) {
