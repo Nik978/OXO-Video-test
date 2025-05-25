@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,19 +39,19 @@
     // - Chiave '4' = Giovedì (evento Buckets), '6' = Sabato (evento Cosplay)
     const playlists = {
       "default": {
-        "Evening_Block_1": ["Intro.mp4"],
-        "Evening_Block_2": ["Football.mp4", "Promo.mp4"],
-        "Late_Block": ["Recruit.mp4", "Bucket.mp4"]
+        "Standard_1"  // 21:00–22:00: ["Intro.mp4"],
+        "DJ"  // 22:00–02:00: ["Football.mp4", "Promo.mp4"],
+        "Standard_2"  // 02:00–05:00: ["Recruit.mp4", "Bucket.mp4"]
       },
       "4": {
-        "Evening_Block_1": ["Bucket.mp4"],
-        "Evening_Block_2": ["Bucket.mp4", "Football.mp4"],
-        "Late_Block": ["Recruit.mp4", "Bucket.mp4"]
+        "Standard_1"  // 21:00–22:00: ["Bucket.mp4"],
+        "DJ"  // 22:00–02:00: ["Bucket.mp4", "Football.mp4"],
+        "Standard_2"  // 02:00–05:00: ["Recruit.mp4", "Bucket.mp4"]
       },
       "6": {
-        "Evening_Block_1": ["Cosplay.mp4"],
-        "Evening_Block_2": ["Football.mp4", "Cosplay.mp4"],
-        "Late_Block": ["Cosplay.mp4", "Recruit.mp4"]
+        "Standard_1"  // 21:00–22:00: ["Cosplay.mp4"],
+        "DJ"  // 22:00–02:00: ["Football.mp4", "Cosplay.mp4"],
+        "Standard_2"  // 02:00–05:00: ["Cosplay.mp4", "Recruit.mp4"]
       }
     };
 
@@ -74,10 +75,10 @@
     // - Determina la fascia oraria attiva in base ai minuti trascorsi da mezzanotte
     // - Fasce fisse: Happy Hour, Evening Blocks, Late, Closed
     function getSection(min) {
-      if (min >= 1140 && min < 1260) return "Happy_Hour";
-      if (min >= 1110 && min < 1140) return "Evening_Block_1";
-      if (min >= 1260 || min < 120) return "Evening_Block_2";
-      if (min >= 120 && min < 300) return "Late_Block";
+      if (min >= 1140 && min < 1260) return "Happy_Hour"  // 19:00–21:00;
+      if (min >= 1110 && min < 1140) return "Standard_1"  // 21:00–22:00;
+      if (min >= 1260 || min < 120) return "DJ"  // 22:00–02:00;
+      if (min >= 120 && min < 300) return "Standard_2"  // 02:00–05:00;
       return "Closed";
     }
 
@@ -140,7 +141,7 @@
       // - 'Happy.mp4' è fisso durante la Happy_Hour
       // - In altri orari viene selezionato in base alla sezione e al giorno
       let name = "Happy.mp4";
-      if (section !== "Happy_Hour") {
+      if (section !== "Happy_Hour"  // 19:00–21:00) {
         const todayPlaylist = playlists[day] || playlists["default"];
         const list = todayPlaylist[section] || [];
         name = list[current % list.length];
@@ -154,7 +155,7 @@
 
       updateDebug(day, section, name);
 
-      if (section === "Happy_Hour" && isCountdownActive(minutes)) {
+      if (section === "Happy_Hour"  // 19:00–21:00 && isCountdownActive(minutes)) {
         countdownBox.style.display = "block";
         updateCountdown();
         countdownTimer = setInterval(updateCountdown, 1000);
