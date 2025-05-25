@@ -126,15 +126,30 @@
 
     function playNext() {
       const now = new Date();
-      const totalMin = now.getHours() * 60 + now.getMinutes();
-      const fasciaAttiva = totalMin >= 1080 || totalMin < 300; // 18:00–05:00
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      const totalMin = hour * 60 + minute;
+
+      let fasciaLabel = "";
+      let fasciaAttiva = false;
+
+      if (totalMin >= 1110 && totalMin < 1260) {
+        fasciaAttiva = true;
+        fasciaLabel = "Attivo (18:30–21:00)";
+      } else if (totalMin >= 1260 || totalMin < 300) {
+        fasciaAttiva = true;
+        fasciaLabel = "Attivo (21:00–05:00)";
+      } else {
+        fasciaAttiva = false;
+        fasciaLabel = "Spento (05:00–18:30)";
+      }
 
       if (!fasciaAttiva) {
         video.style.display = "none";
         video.pause();
         logo.style.display = "block";
         logo.src = logoUrl;
-        updateDebug("Spento", "-", versione);
+        updateDebug(fasciaLabel, "-", versione);
         return;
       }
 
@@ -144,7 +159,7 @@
       video.src = src;
       video.style.display = "block";
       video.play();
-      updateDebug("Attivo", name, versione);
+      updateDebug(fasciaLabel, name, versione);
 
       if (name === "Happy" && isHappyCountdownActive()) {
         countdownBox.style.display = "block";
