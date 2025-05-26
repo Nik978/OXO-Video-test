@@ -43,8 +43,10 @@
   const logo = document.getElementById('logo');
   const debug = document.getElementById('debug');
   const countdownBox = document.getElementById('countdown');
-  const logoUrl = "TV/logo.png";
-  const versione = "TV";
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const versione = isMobile ? "Mobile" : "TV";
+  const base = versione + "/";
+  const logoUrl = base + "logo.png";
 
   const schedule = {
     "default": {
