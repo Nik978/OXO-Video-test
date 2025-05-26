@@ -1,4 +1,4 @@
-{
+
   "1": {
     "Standard_1": [
       "Intro.mp4",
@@ -15,8 +15,20 @@
       "Happy.mp4",
       "Bucket.mp4"
     ],
-    "DJ": [],
-    "Standard_2": []
+    "DJ": [
+      "\"Intro.mp4\"",
+      "\"Football.mp4\"",
+      "\"Happy.mp4\"",
+      "\"Cosplay.mp4\"",
+      "\"Bucket.mp4\""
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Football.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4"
+    ]
   },
   "4": {
     "Standard_1": [
