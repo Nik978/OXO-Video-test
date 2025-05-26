@@ -1,76 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>OXO Scheduler</title>
   <style>
     body {
       margin: 0;
-      background-color: black;
+      background: black;
+      color: white;
+      font-family: monospace;
     }
-    video {
+    #video {
       width: 100vw;
       height: 100vh;
       object-fit: cover;
-      display: block;
+      display: none;
     }
     #logo {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      max-width: 60%;
-      max-height: 60%;
-      display: none;
-    }
-    #countdown {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: yellow;
-      font-size: 2em;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 10px;
-      font-family: monospace;
+      max-width: 80vw;
+      max-height: 80vh;
       display: none;
     }
     #debug {
-      position: fixed;
+      position: absolute;
       bottom: 10px;
       left: 10px;
-      background: rgba(0, 0, 0, 0.7);
-      color: #0f0;
-      padding: 10px;
-      font-family: monospace;
       font-size: 12px;
-      z-index: 9999;
+      color: #0f0;
+    }
+    #countdown {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2em;
+      font-weight: bold;
+      color: #fff;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <video id="player" autoplay muted playsinline></video>
-  <img id="logo" src="" alt="Logo" />
+
+  <video id="video" autoplay muted playsinline></video>
+  <img id="logo" src="TV/logo.png" alt="Logo">
   <div id="countdown"></div>
   <div id="debug"></div>
 
   <script>
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const folder = isMobile ? "Mobile" : "TV";
-    const versione = "2025.05.full";
+    const video = document.getElementById('video');
+    const logo = document.getElementById('logo');
+    const debug = document.getElementById('debug');
+    const countdownBox = document.getElementById('countdown');
 
-    const videoMap = {
-      "Bucket": `${folder}/Bucket.mp4`,
-      "Cosplay": `${folder}/Cosplay.mp4`,
-      "Football": `${folder}/Football.mp4`,
-      "Happy": `${folder}/Happy.mp4`,
-      "Intro": `${folder}/Intro.mp4`,
-      "Recruit": `${folder}/Recruit.mp4`,
-      "Promo": `${folder}/Promo.mp4`
-    };
-
-    const logoUrl = `${folder}/logo.png`;
-
-    const scheduleData = {
+    const logoUrl = "TV/logo.png";
+    const versione = "Mobile";
+    const schedule = {
       "default": {
         "Standard_1": ["Intro.mp4"],
         "DJ": ["Football.mp4", "Promo.mp4"],
@@ -88,110 +77,98 @@
       }
     };
 
-    const video = document.getElementById("player");
-    const logo = document.getElementById("logo");
-    const countdownBox = document.getElementById("countdown");
-    const debugDiv = document.getElementById("debug");
+    const videoMap = {};
+    const base = "TV/";
+    Object.values(schedule).forEach(day => {
+      Object.values(day).flat().forEach(name => {
+        videoMap[name] = base + name;
+      });
+    });
 
-    let playlist = [];
+    function getDayAndSection() {
+      const now = new Date();
+      let day = now.getDay();
+      if (day === 0) day = 7;
+
+      const h = now.getHours(), m = now.getMinutes();
+      const min = h * 60 + m;
+
+      if (min < 300) {
+        day -= 1;
+        if (day < 1) day = 7;
+      }
+
+      let section = "Closed";
+      if (min >= 1170 && min < 1260) section = "Happy_Hour"; // 19:30–21:00
+      else if (min >= 1260 && min < 1320) section = "Standard_1"; // 21:00–22:00
+      else if (min >= 1320 || min < 120) section = "DJ"; // 22:00–02:00
+      else if (min >= 120 && min < 300) section = "Standard_2"; // 02:00–05:00
+
+      return { day, min, section };
+    }
+
     let current = 0;
+    let playlist = [];
     let countdownTimer = null;
 
-    function getCurrentDay() {
-      const now = new Date();
-      const h = now.getHours();
-      return (h < 5) ? (now.getDay() === 0 ? 7 : now.getDay()) : now.getDay();
-    }
-
-    function getSection(min) {
-      if (min >= 1140 && min < 1260) return "Happy_Hour";       // 19:00–21:00
-      if (min >= 1260 && min < 1320) return "Standard_1";       // 21:00–22:00
-      if (min >= 1320 || min < 120) return "DJ";                // 22:00–02:00
-      if (min >= 120 && min < 300) return "Standard_2";         // 02:00–05:00
-      return "Closed";                                          // 05:00–19:00
-    }
-
-    function getPlaylist() {
-      const now = new Date();
-      const minutes = now.getHours() * 60 + now.getMinutes();
-      const section = getSection(minutes);
-      const day = getCurrentDay().toString();
-      const config = scheduleData[day] || scheduleData["default"];
-      return {
-        list: config[section] || [],
-        sectionName: section
-      };
-    }
-
-    function updateDebug(fascia, videoName) {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, "0");
-      const m = String(now.getMinutes()).padStart(2, "0");
-      const s = String(now.getSeconds()).padStart(2, "0");
-      const d = getCurrentDay();
-      debugDiv.innerHTML = `
-        🕒 Time: ${h}:${m}:${s}<br>
-        📆 Day: ${d}<br>
-        🎯 Section: ${fascia}<br>
-        ▶️ Video: ${videoName}<br>
-        🔁 Version: ${versione}
-      `;
-    }
-
-    function isHappyCountdownActive() {
-      const now = new Date();
-      const min = now.getHours() * 60 + now.getMinutes();
-      return min >= 1140 && min < 1260; // 19:00–21:00
+    function updateDebug(day, section, name) {
+      debug.innerText =
+        `Time: ${new Date().toLocaleTimeString()}\n` +
+        `Day: ${day}\n` +
+        `Section: ${section}\n` +
+        `Video: ${name}\n` +
+        `Version: ${versione}`;
     }
 
     function updateCountdown() {
       const now = new Date();
       const target = new Date();
       target.setHours(21, 0, 0, 0);
-      if (target < now) target.setDate(target.getDate() + 1);
+      if (now > target) target.setDate(target.getDate() + 1);
+
       const diff = target - now;
-      if (diff <= 0) {
-        countdownBox.style.display = "none";
-        clearInterval(countdownTimer);
-        return;
-      }
-      const h = Math.floor(diff / 3.6e6);
-      const m = Math.floor((diff % 3.6e6) / 6e4);
-      const s = Math.floor((diff % 6e4) / 1e3);
-      countdownBox.innerText = `Countdown: ${h}h ${m}m ${s}s`;
+      const h = Math.floor(diff / 1000 / 60 / 60);
+      const m = Math.floor((diff / 1000 / 60) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+
+      countdownBox.innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function isHappyCountdownActive(min) {
+      return min >= 1140 && min < 1260; // 19:00–21:00
     }
 
     function playNext() {
-      const now = new Date();
-      const totalMin = now.getHours() * 60 + now.getMinutes();
-      const isActive = totalMin >= 1080 || totalMin < 300; // 18:00–05:00
+      const { day, min, section } = getDayAndSection();
+      const active = min >= 300;
 
-      if (!isActive) {
-        logo.src = logoUrl;
-        logo.style.display = "block";
+      if (!active) {
         video.pause();
         video.style.display = "none";
-        updateDebug("Spento (05:00–18:00)", "-");
+        logo.style.display = "block";
+        updateDebug(day, "Closed", "-");
+        countdownBox.style.display = "none";
         return;
       }
 
       logo.style.display = "none";
-      video.style.display = "block";
+      const daySchedule = schedule[day] || schedule["default"];
+      playlist = daySchedule[section] || [];
 
-      if (playlist.length === 0 || current >= playlist.length) {
-        const res = getPlaylist();
-        playlist = res.list;
-        current = 0;
+      if (playlist.length === 0) {
+        video.style.display = "none";
+        updateDebug(day, section, "No video");
+        return;
       }
 
       const name = playlist[current % playlist.length];
-      const src = videoMap[name.replace(".mp4", "")] || `${folder}/${name}`;
+      const src = videoMap[name];
       video.src = src;
+      video.style.display = "block";
       video.play();
-      updateDebug(getSection(totalMin), name);
-      current++;
+      updateDebug(day, section, name);
 
-      if (name === "Happy.mp4" && isHappyCountdownActive()) {
+      if (name.includes("Happy") && isHappyCountdownActive(min)) {
         countdownBox.style.display = "block";
         updateCountdown();
         countdownTimer = setInterval(updateCountdown, 1000);
@@ -199,10 +176,12 @@
         countdownBox.style.display = "none";
         clearInterval(countdownTimer);
       }
+
+      current++;
     }
 
-    video.onended = playNext;
-    playNext();
+    video.addEventListener('ended', playNext);
+    window.addEventListener('load', playNext);
   </script>
 </body>
 </html>
