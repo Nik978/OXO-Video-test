@@ -1,0 +1,41 @@
+{
+  "default": {
+    "Standard_1": [
+      "Intro.mp4"
+    ],
+    "DJ": [
+      "Football.mp4",
+      "Promo.mp4"
+    ],
+    "Standard_2": [
+      "Recruit.mp4",
+      "Bucket.mp4"
+    ]
+  },
+  "4": {
+    "Standard_1": [
+      "Bucket.mp4"
+    ],
+    "DJ": [
+      "Bucket.mp4",
+      "Football.mp4"
+    ],
+    "Standard_2": [
+      "Recruit.mp4",
+      "Bucket.mp4"
+    ]
+  },
+  "6": {
+    "Standard_1": [
+      "Cosplay.mp4"
+    ],
+    "DJ": [
+      "Football.mp4",
+      "Cosplay.mp4"
+    ],
+    "Standard_2": [
+      "Cosplay.mp4",
+      "Recruit.mp4"
+    ]
+  }
+}
