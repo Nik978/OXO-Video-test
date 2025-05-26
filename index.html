@@ -37,7 +37,7 @@
 
     function getCommercialDate() {
       const now = new Date();
-      now.setHours(now.getHours() - 5); // commercial day shifts at 5am
+      now.setHours(now.getHours() - 5); // giornata commerciale dalle 5:00
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const dd = String(now.getDate()).padStart(2, '0');
