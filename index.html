@@ -86,26 +86,29 @@
     });
 
     function getDayAndSection() {
-      const now = new Date();
-      let day = now.getDay();
-      if (day === 0) day = 7;
+  const now = new Date();
+  let day = now.getDay();
+  if (day === 0) day = 7;
 
-      const h = now.getHours(), m = now.getMinutes();
-      const min = h * 60 + m;
+  const h = now.getHours(), m = now.getMinutes();
+  const min = h * 60 + m;
 
-      if (min < 300) {
-        day -= 1;
-        if (day < 1) day = 7;
-      }
+  // Giornata commerciale: passa al giorno precedente se prima delle 5:00
+  if (min < 300) {
+    day -= 1;
+    if (day < 1) day = 7;
+  }
 
-      let section = "Closed";
-      if (min >= 1170 && min < 1260) section = "Happy_Hour"; // 19:30–21:00
-      else if (min >= 1260 && min < 1320) section = "Standard_1"; // 21:00–22:00
-      else if (min >= 1320 || min < 120) section = "DJ"; // 22:00–02:00
-      else if (min >= 120 && min < 300) section = "Standard_2"; // 02:00–05:00
+  let section = "Closed";
 
-      return { day, min, section };
-    }
+  if (min >= 1110 && min < 1260) section = "Happy_Hour";     // 18:30–21:00
+  else if (min >= 1260 && min < 1320) section = "Standard_1"; // 21:00–22:00
+  else if (min >= 1320 || min < 120) section = "DJ";          // 22:00–02:00
+  else if (min >= 120 && min < 300)  section = "Standard_2";  // 02:00–05:00
+  else if (min >= 300 && min < 1110) section = "Closed";      // 05:00–18:30
+
+  return { day, min, section };
+}
 
     let current = 0;
     let playlist = [];
