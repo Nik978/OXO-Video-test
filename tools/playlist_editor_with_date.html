@@ -1,116 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>OXO Playlist Editor</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       background: #111;
       color: #eee;
       padding: 20px;
     }
-    h1 { color: #0f0; }
     select, input, button, textarea {
       margin: 5px;
       padding: 5px;
-      font-size: 1em;
     }
-    .block {
+    textarea {
+      width: 100%;
+      height: 300px;
+    }
+    .section {
+      margin-bottom: 15px;
       border: 1px solid #444;
       padding: 10px;
-      margin: 10px 0;
       background: #222;
     }
-    label { display: inline-block; width: 150px; }
   </style>
 </head>
 <body>
-  <h1>🎛️ OXO Playlist Editor</h1>
+  <h1>OXO Playlist Editor with Date Support</h1>
 
-  <div class="block">
-    <label for="day">Day (1-7 or YYYY-MM-DD):</label>
-    <input id="day" placeholder="e.g. 1 or 2025-06-15" />
-    <button onclick="loadDay()">Load</button>
-  </div>
+  <label for="daySelect">Day (1=Mon ... 7=Sun or YYYY-MM-DD):</label>
+  <input type="text" id="daySelect" placeholder="4 or 2025-06-01">
 
-  <div id="sections" class="block" style="display:none;">
-    <h3 id="dayLabel"></h3>
-    <div>
-      <label>Standard_1:</label>
-      <input id="Standard_1" placeholder="comma-separated filenames" />
-    </div>
-    <div>
-      <label>Happy_Hour:</label>
-      <input id="Happy_Hour" placeholder="comma-separated filenames" />
-    </div>
-    <div>
-      <label>DJ:</label>
-      <input id="DJ" placeholder="comma-separated filenames" />
-    </div>
-    <div>
-      <label>Standard_2:</label>
-      <input id="Standard_2" placeholder="comma-separated filenames" />
-    </div>
-    <button onclick="saveDay()">💾 Save Section</button>
-  </div>
+  <div id="sections"></div>
 
-  <div class="block">
-    <button onclick="exportJSON()">⬇️ Export JSON</button>
-    <button onclick="clearEditor()">🧹 Clear Editor</button><br/>
-    <textarea id="output" rows="20" cols="80" placeholder="JSON output will appear here..."></textarea>
-  </div>
+  <button onclick="addSection()">➕ Add Section</button>
+  <button onclick="exportJSON()">📤 Export JSON</button>
+
+  <h3>Resulting JSON:</h3>
+  <textarea id="output" readonly></textarea>
 
   <script>
-    const url = "https://nik978.github.io/OXO-Video-test/schedule.json";
     let data = {};
 
-    fetch(url)
-      .then(res => res.json())
-      .then(json => {
-        data = json;
-        document.getElementById("output").value = JSON.stringify(data, null, 2);
-      })
-      .catch(err => {
-        document.getElementById("output").value = "⚠️ Failed to load JSON.";
-        console.error(err);
-      });
+    function addSection() {
+      const container = document.createElement("div");
+      container.className = "section";
 
-    function loadDay() {
-      const key = document.getElementById("day").value.trim();
-      if (!key) return;
-      const obj = data[key] || {};
-      document.getElementById("Standard_1").value = (obj.Standard_1 || []).join(",");
-      document.getElementById("Happy_Hour").value = (obj.Happy_Hour || []).join(",");
-      document.getElementById("DJ").value = (obj.DJ || []).join(",");
-      document.getElementById("Standard_2").value = (obj.Standard_2 || []).join(",");
-      document.getElementById("sections").style.display = "block";
-      document.getElementById("dayLabel").innerText = `Editing: ${key}`;
-    }
+      const sectionInput = document.createElement("input");
+      sectionInput.placeholder = "Section (e.g. DJ)";
+      container.appendChild(sectionInput);
 
-    function saveDay() {
-      const key = document.getElementById("day").value.trim();
-      if (!key) return;
-      data[key] = {
-        Standard_1: document.getElementById("Standard_1").value.split(",").map(x => x.trim()).filter(Boolean),
-        Happy_Hour: document.getElementById("Happy_Hour").value.split(",").map(x => x.trim()).filter(Boolean),
-        DJ: document.getElementById("DJ").value.split(",").map(x => x.trim()).filter(Boolean),
-        Standard_2: document.getElementById("Standard_2").value.split(",").map(x => x.trim()).filter(Boolean)
-      };
-      exportJSON();
+      const videosInput = document.createElement("input");
+      videosInput.placeholder = "Videos (comma separated)";
+      container.appendChild(videosInput);
+
+      document.getElementById("sections").appendChild(container);
     }
 
     function exportJSON() {
-      document.getElementById("output").value = JSON.stringify(data, null, 2);
-    }
+      const dayKey = document.getElementById("daySelect").value.trim();
+      if (!dayKey) return alert("Inserisci un giorno valido.");
 
-    function clearEditor() {
-      document.getElementById("day").value = "";
-      ["Standard_1", "Happy_Hour", "DJ", "Standard_2"].forEach(id => {
-        document.getElementById(id).value = "";
+      const sectionDivs = document.querySelectorAll(".section");
+      const entry = {};
+
+      sectionDivs.forEach(div => {
+        const [sectionInput, videosInput] = div.querySelectorAll("input");
+        const sectionName = sectionInput.value.trim();
+        const videos = videosInput.value.trim().split(",").map(v => v.trim()).filter(v => v);
+
+        if (sectionName && videos.length) {
+          entry[sectionName] = videos;
+        }
       });
-      document.getElementById("sections").style.display = "none";
-      document.getElementById("dayLabel").innerText = "";
+
+      if (Object.keys(entry).length > 0) {
+        data[dayKey] = entry;
+        document.getElementById("output").value = JSON.stringify(data, null, 2);
+      } else {
+        alert("Nessuna sezione valida trovata.");
+      }
     }
   </script>
 </body>
