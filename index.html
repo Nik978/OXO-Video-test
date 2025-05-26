@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OXO Scheduler - JSON Powered</title>
+  <title>OXO Scheduler - JSON with Date Support</title>
   <style>
     body { margin: 0; background: black; overflow: hidden; }
     video { width: 100vw; height: 100vh; object-fit: cover; display: none; }
@@ -25,7 +24,7 @@
   <script>
     const isMobile = /Android|iPhone/i.test(navigator.userAgent);
     const version = isMobile ? "Mobile" : "TV";
-    const basePath = `https://nik978.github.io/OXO-Video-test/${version}/`;
+    const basePath = `./${version}/`;
     const logoUrl = basePath + "logo.png";
 
     const video = document.getElementById("player");
@@ -36,6 +35,15 @@
     let countdownTimer = null;
     let playlistData = {};
 
+    function getCommercialDate() {
+      const now = new Date();
+      now.setHours(now.getHours() - 5); // commercial day shifts at 5am
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
     function getDayNumberCommercial() {
       const now = new Date();
       now.setHours(now.getHours() - 5);
@@ -44,11 +52,11 @@
     }
 
     function getSection(min) {
-      if (min < 1110) return "Closed";             // 05:00–18:30
-      if (min >= 1110 && min < 1140) return "Standard_1"; // 18:30–19:00
-      if (min >= 1140 && min < 1260) return "Happy_Hour"; // 19:00–21:00
-      if (min >= 1260 || min < 120) return "DJ";         // 21:00–02:00
-      if (min >= 120 && min < 300) return "Standard_2";  // 02:00–05:00
+      if (min < 1110) return "Closed";
+      if (min >= 1110 && min < 1140) return "Standard_1";
+      if (min >= 1140 && min < 1260) return "Happy_Hour";
+      if (min >= 1260 || min < 120) return "DJ";
+      if (min >= 120 && min < 300) return "Standard_2";
       return "Closed";
     }
 
@@ -75,7 +83,7 @@
       countdownBox.innerText = `Countdown: ${h}h ${m}m ${s}s`;
     }
 
-    function updateDebug(day, section, name) {
+    function updateDebug(label, section, name) {
       const now = new Date();
       const h = String(now.getHours()).padStart(2, "0");
       const m = String(now.getMinutes()).padStart(2, "0");
@@ -83,7 +91,7 @@
 
       debugDiv.innerHTML = `
         🕒 Time: ${h}:${m}:${s}<br>
-        📆 Day: ${day}<br>
+        📅 Playlist Key: ${label}<br>
         🔁 Section: ${section}<br>
         🎞️ Now Playing: ${name}<br>
         📱 Version: ${version}
@@ -94,19 +102,21 @@
       const now = new Date();
       const minutes = now.getHours() * 60 + now.getMinutes();
       const section = getSection(minutes);
-      const day = getDayNumberCommercial();
+      const dateKey = getCommercialDate();
+      const dayKey = getDayNumberCommercial();
+      let source = playlistData[dateKey] || playlistData[dayKey] || playlistData["default"] || {};
+      let label = playlistData[dateKey] ? dateKey : (playlistData[dayKey] ? dayKey : "default");
 
       if (section === "Closed") {
         video.style.display = "none";
         video.pause();
         logo.style.display = "block";
         logo.src = logoUrl;
-        updateDebug(day, section, "-");
+        updateDebug(label, section, "-");
         return;
       }
 
-      const sourceDay = playlistData[day] || playlistData["default"] || {};
-      const list = sourceDay[section] || [];
+      const list = source[section] || [];
       const name = section === "Happy_Hour" ? "Happy.mp4" : list[current % list.length];
       const src = basePath + name;
 
@@ -114,7 +124,7 @@
       video.style.display = "block";
       logo.style.display = "none";
       video.play();
-      updateDebug(day, section, name);
+      updateDebug(label, section, name);
 
       if (section === "Happy_Hour" && isCountdownActive(minutes)) {
         countdownBox.style.display = "block";
@@ -130,7 +140,6 @@
 
     video.onended = playNext;
 
-    // Fetch the JSON file
     fetch("schedule.json")
       .then(res => res.json())
       .then(data => {
