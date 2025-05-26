@@ -140,7 +140,7 @@
 
     video.onended = playNext;
 
-    fetch("schedule.json")
+    fetch("https://nik978.github.io/OXO-Video-test/schedule.json")
       .then(res => res.json())
       .then(data => {
         playlistData = data;
