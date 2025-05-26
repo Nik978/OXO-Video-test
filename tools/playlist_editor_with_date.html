@@ -1,71 +1,136 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>OXO Playlist Editor with Date</title>
+  <meta charset="UTF-8">
+  <title>OXO Full Playlist Editor</title>
   <style>
-    body {
-      background: #111;
-      color: #fff;
-      font-family: "Comic Sans MS", sans-serif;
-      padding: 20px;
-    }
-    input, button {
-      margin: 4px;
-      padding: 6px;
-      font-size: 1em;
-    }
-    #jsonOutput {
-      white-space: pre-wrap;
-      background: #222;
-      padding: 10px;
-      border: 1px solid #555;
-    }
+    body { font-family: monospace; padding: 20px; background: #111; color: #eee; }
+    h2 { color: #7fffd4; }
+    label { display: inline-block; width: 120px; vertical-align: top; }
+    textarea, input { width: 80%; background: #222; color: #eee; border: 1px solid #444; padding: 4px; margin-bottom: 10px; }
+    textarea { height: 40px; }
+    .section { margin-bottom: 20px; border-bottom: 1px dashed #555; padding-bottom: 10px; }
+    .day { margin-bottom: 20px; background: #1e1e1e; padding: 10px; border: 1px solid #444; }
+    .json-output { background: #222; color: #0f0; padding: 10px; margin-top: 20px; white-space: pre-wrap; }
+    button { background: #333; color: #fff; padding: 8px 16px; border: none; cursor: pointer; margin: 5px; }
+    button:hover { background: #555; }
+    input.date { width: 160px; }
   </style>
 </head>
 <body>
-  <h2>OXO Playlist Editor with Date</h2>
-  <label>Day (1=Mon ... 7=Sun or YYYY-MM-DD):</label>
-  <input type="text" id="dayInput" value="2025-05-26" />
-  <br />
-  <input type="text" id="sectionInput" placeholder="Section (e.g. DJ)" />
-  <input type="text" id="videosInput" placeholder="Videos (comma separated)" />
-  <button onclick="addSection()">➕ Add Section</button>
-  <button onclick="exportJSON()">📦 Export JSON</button>
-  <h3>Resulting JSON:</h3>
-  <pre id="jsonOutput">{}</pre>
 
-  <script>
-    const playlistData = {};
+<h1>OXO Full Playlist Editor</h1>
 
-    function addSection() {
-      const day = document.getElementById("dayInput").value.trim();
-      const section = document.getElementById("sectionInput").value.trim();
-      const videos = document.getElementById("videosInput").value.split(",").map(v => v.trim()).filter(v => v);
+<div>
+  <label>Import from index.html:</label>
+  <input type="file" id="indexFileInput">
+</div>
 
-      if (!day || !section || videos.length === 0) {
-        alert("Please fill in all fields.");
-        return;
+<div>
+  <label>Add custom date:</label>
+  <input class="date" type="text" id="customDate" placeholder="yyyy-mm-dd">
+  <button onclick="addDate()">➕ Add</button>
+</div>
+
+<div id="editor"></div>
+
+<button onclick="generateJSON()">📦 Export JSON</button>
+
+<pre id="output" class="json-output"></pre>
+
+<script>
+  const sectionNames = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
+  const defaultDays = ["default", "1", "2", "3", "4", "5", "6", "7"];
+  const schedule = {};
+
+  function createEditor(day) {
+    const div = document.createElement("div");
+    div.className = "day";
+    div.id = "day_" + day;
+
+    const title = document.createElement("h2");
+    title.textContent = (day === "default" ? "Default (Fallback)" :
+      isNaN(day) ? `Date: ${day}` : `Day ${day}`);
+    div.appendChild(title);
+
+    sectionNames.forEach(section => {
+      const sec = document.createElement("div");
+      sec.className = "section";
+
+      const label = document.createElement("label");
+      label.textContent = section;
+      sec.appendChild(label);
+
+      const textarea = document.createElement("textarea");
+      textarea.id = `${day}_${section}`;
+      textarea.placeholder = "Comma-separated video list";
+      sec.appendChild(textarea);
+
+      div.appendChild(sec);
+    });
+
+    document.getElementById("editor").appendChild(div);
+  }
+
+  function generateJSON() {
+    const json = {};
+    document.querySelectorAll(".day").forEach(dayDiv => {
+      const dayKey = dayDiv.id.replace("day_", "");
+      json[dayKey] = {};
+
+      sectionNames.forEach(section => {
+        const val = document.getElementById(`${dayKey}_${section}`).value;
+        if (val.trim()) {
+          json[dayKey][section] = val.split(",").map(s => s.trim());
+        }
+      });
+    });
+
+    document.getElementById("output").textContent = JSON.stringify(json, null, 2);
+  }
+
+  function addDate() {
+    const date = document.getElementById("customDate").value.trim();
+    if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      alert("Invalid date format. Use yyyy-mm-dd");
+      return;
+    }
+    if (document.getElementById("day_" + date)) {
+      alert("Date already exists!");
+      return;
+    }
+    createEditor(date);
+  }
+
+  document.getElementById("indexFileInput").addEventListener("change", function(event) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const text = e.target.result;
+      const match = text.match(/const schedule = ({[\s\S]+?});/);
+      if (match) {
+        try {
+          const imported = eval("(" + match[1] + ")");
+          for (const [day, sections] of Object.entries(imported)) {
+            if (!document.getElementById("day_" + day)) createEditor(day);
+            for (const [section, videos] of Object.entries(sections)) {
+              const input = document.getElementById(`${day}_${section}`);
+              if (input) input.value = videos.join(", ");
+            }
+          }
+          alert("Schedule imported from index.html!");
+        } catch (e) {
+          alert("Failed to parse schedule.");
+        }
+      } else {
+        alert("No schedule found in the file.");
       }
+    };
+    reader.readAsText(event.target.files[0]);
+  });
 
-      if (!playlistData[day]) playlistData[day] = {};
-      playlistData[day][section] = videos;
+  defaultDays.forEach(createEditor);
+</script>
 
-      document.getElementById("jsonOutput").textContent = JSON.stringify(playlistData, null, 2);
-
-      // Clear inputs
-      document.getElementById("sectionInput").value = "";
-      document.getElementById("videosInput").value = "";
-    }
-
-    function exportJSON() {
-      const blob = new Blob([JSON.stringify(playlistData, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "schedule.json";
-      link.click();
-    }
-  </script>
 </body>
 </html>
