@@ -1,28 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>OXO Scheduler</title>
   <style>
     body { margin: 0; background: black; font-family: monospace; }
     video { width: 100vw; height: 100vh; object-fit: cover; display: none; }
     #logo {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      max-width: 80vw;
-      max-height: 80vh;
+      max-width: 80vw; max-height: 80vh;
       display: none;
-    }
-    #debug {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      font-size: 12px;
-      color: #0f0;
-      background: rgba(0,0,0,0.5);
-      padding: 8px;
     }
     #countdown {
       position: absolute;
@@ -30,33 +19,55 @@
       left: 50%;
       transform: translateX(-50%);
       font-size: 2em;
-      font-weight: bold;
-      color: #fff;
+      color: yellow;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 16px;
       display: none;
+    }
+    #debug {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      color: #0f0;
+      font-size: 12px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 6px;
     }
   </style>
 </head>
 <body>
 
 <video id="video" autoplay muted playsinline></video>
-<img id="logo" src="TV/logo.png" alt="Logo">
+<img id="logo" src="TV/logo.png" alt="Logo" />
 <div id="countdown"></div>
 <div id="debug"></div>
 
 <script>
-  const video = document.getElementById('video');
-  const logo = document.getElementById('logo');
-  const debug = document.getElementById('debug');
-  const countdownBox = document.getElementById('countdown');
+  const video = document.getElementById("video");
+  const logo = document.getElementById("logo");
+  const countdownBox = document.getElementById("countdown");
+  const debug = document.getElementById("debug");
   const logoUrl = "TV/logo.png";
   const versione = "TV";
 
   const schedule = {
-    "default": {
+    "1": { /* Monday */
       "Happy_Hour": ["Happy.mp4", "Football.mp4", "Happy.mp4", "Bucket.mp4", "Happy.mp4", "Cosplay.mp4", "Happy.mp4", "Recruit.mp4"],
       "Standard_1": ["Happy.mp4", "Football.mp4", "Bucket.mp4", "Cosplay.mp4", "Recruit.mp4"],
       "DJ": ["Happy.mp4", "Football.mp4", "Bucket.mp4", "Cosplay.mp4", "Recruit.mp4"],
       "Standard_2": ["Happy.mp4", "Football.mp4", "Bucket.mp4", "Cosplay.mp4", "Recruit.mp4"]
+    },
+    "2": { /* Tuesday */
+      "Happy_Hour": ["Happy.mp4", "Football.mp4", "Happy.mp4", "Bucket.mp4", "Happy.mp4", "Cosplay.mp4", "Happy.mp4", "Recruit.mp4"],
+      "Standard_1": ["Happy.mp4", "Football.mp4", "Bucket.mp4", "Cosplay.mp4", "Recruit.mp4"],
+      "DJ": ["Happy.mp4", "Football.mp4", "Bucket.mp4", "Cosplay.mp4", "Recruit.mp4"],
+      "Standard_2": ["Happy.mp4", "Football.mp4", "Bucket.mp4", "Cosplay.mp4", "Recruit.mp4"]
+    },
+    "default": {
+      "Happy_Hour": ["Happy.mp4", "Football.mp4", "Happy.mp4", "Bucket.mp4"],
+      "Standard_1": ["Intro.mp4", "Football.mp4"],
+      "DJ": ["Bucket.mp4", "Cosplay.mp4"],
+      "Standard_2": ["Recruit.mp4", "Bucket.mp4"]
     }
   };
 
@@ -71,37 +82,32 @@
   function getDayAndSection() {
     const now = new Date();
     let day = now.getDay();
-    if (day === 0) day = 7;
-
-    const h = now.getHours(), m = now.getMinutes();
+    if (day === 0) day = 7; // Sunday = 7
+    let h = now.getHours(), m = now.getMinutes();
     const min = h * 60 + m;
 
-    if (min < 300) {
-      day -= 1;
-      if (day < 1) day = 7;
-    }
+    if (min < 300) { day -= 1; if (day < 1) day = 7; }
 
     let section = "Closed";
-    if (min >= 1110 && min < 1260) section = "Happy_Hour";     // 18:30–21:00
+    if (min >= 1110 && min < 1260) section = "Happy_Hour";      // 18:30–21:00
     else if (min >= 1260 && min < 1320) section = "Standard_1"; // 21:00–22:00
-    else if (min >= 1320 || min < 120) section = "DJ";          // 22:00–02:00
-    else if (min >= 120 && min < 300)  section = "Standard_2";  // 02:00–05:00
-    else if (min >= 300 && min < 1110) section = "Closed";      // 05:00–18:30
+    else if (min >= 1320 || min < 120)  section = "DJ";         // 22:00–02:00
+    else if (min >= 120 && min < 300)   section = "Standard_2"; // 02:00–05:00
+    else if (min >= 300 && min < 1110)  section = "Closed";     // 05:00–18:30
 
-    return { day, min, section };
+    return { day, section, min };
   }
 
   let current = 0;
   let playlist = [];
   let countdownTimer = null;
 
-  function updateDebug(day, section, name) {
-    debug.innerText =
-      `🕒 Time: ${new Date().toLocaleTimeString()}\n` +
-      `📅 Day: ${day}\n` +
-      `🎯 Section: ${section}\n` +
-      `🎞️ Video: ${name}\n` +
-      `📦 Version: ${versione}`;
+  function updateDebug(day, section, videoName) {
+    debug.innerText = `🕒 Time: ${new Date().toLocaleTimeString()}
+📅 Day: ${day}
+🎯 Section: ${section}
+🎞️ Video: ${videoName}
+📦 Version: ${versione}`;
   }
 
   function updateCountdown() {
@@ -111,22 +117,27 @@
     if (now > target) target.setDate(target.getDate() + 1);
 
     const diff = target - now;
-    const h = Math.floor(diff / 1000 / 60 / 60);
-    const m = Math.floor((diff / 1000 / 60) % 60);
-    const s = Math.floor((diff / 1000) % 60);
+    if (diff <= 0) {
+      countdownBox.style.display = "none";
+      clearInterval(countdownTimer);
+      return;
+    }
 
-    countdownBox.innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    countdownBox.innerText = `⏳ ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }
 
   function isHappyCountdownActive(min) {
-    return min >= 1140 && min < 1260; // 19:00–21:00
+    return min >= 1140 && min < 1260;
   }
 
   function playNext() {
-    const { day, min, section } = getDayAndSection();
-    const active = section !== "Closed";
+    const { day, section, min } = getDayAndSection();
+    const isOpen = section !== "Closed";
 
-    if (!active) {
+    if (!isOpen) {
       video.pause();
       video.style.display = "none";
       logo.style.display = "block";
@@ -136,8 +147,8 @@
     }
 
     logo.style.display = "none";
-    const daySchedule = schedule[day] || schedule["default"];
-    playlist = daySchedule[section] || [];
+    const today = schedule[day] || schedule["default"];
+    playlist = today[section] || [];
 
     if (playlist.length === 0) {
       video.style.display = "none";
@@ -146,7 +157,7 @@
     }
 
     const name = playlist[current % playlist.length];
-    const src = videoMap[name];
+    const src = videoMap[name] || base + name;
     video.src = src;
     video.style.display = "block";
     video.play();
