@@ -2,25 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>OXO Playlist Editor & Exporter</title>
+  <title>OXO Playlist Editor Full</title>
   <style>
     body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
-    textarea, input, button {
+    textarea, input, button, select {
       font-family: monospace; font-size: 14px;
       background: #222; color: #0f0; border: 1px solid #444;
-      padding: 5px; margin: 5px 0; width: 100%;
+      padding: 5px; margin: 5px 0;
     }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    td, th { border: 1px solid #555; padding: 5px; vertical-align: top; }
+    th { background: #222; }
+    textarea.small { width: 100%; height: 60px; }
   </style>
 </head>
 <body>
 
-<h2>🎞️ OXO Schedule Editor + Export to index.html</h2>
+<h2>🎞️ OXO Playlist Editor + JSON/Table Interface</h2>
 
 <input type="file" id="fileInput" accept=".html">
 <button onclick="loadIndex()">📥 Importa index.html</button>
+<button onclick="applyTableToJSON()">🔄 Applica modifiche da tabella</button>
 <br><br>
 
-<textarea id="json" rows="30" placeholder="Modifica qui il JSON dello schedule..."></textarea>
+<div id="tableContainer"></div>
+
+<textarea id="json" rows="20" placeholder="Modifica direttamente il JSON..."></textarea>
 <br>
 <button onclick="formatJSON()">✨ Format</button>
 <button onclick="validateJSON()">✅ Validate</button>
@@ -43,6 +50,7 @@
           const clean = match[1].replace(/,\s*}/g, '}');
           const obj = JSON.parse(clean);
           document.getElementById('json').value = JSON.stringify(obj, null, 2);
+          buildTableFromJSON(obj);
           output.innerText = "✅ JSON importato da index.html";
         } catch (err) {
           output.innerText = "❌ Errore nel parsing: " + err.message;
@@ -54,11 +62,49 @@
     reader.readAsText(input.files[0]);
   }
 
+  function buildTableFromJSON(data) {
+    const container = document.getElementById('tableContainer');
+    const sections = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
+    const days = ["1", "2", "3", "4", "5", "6", "7", "default", "2025-05-31"];
+    let html = "<table><tr><th>Giorno</th>" + sections.map(s => `<th>${s}</th>`).join('') + "</tr>";
+
+    days.forEach(day => {
+      html += `<tr><td>${day}</td>`;
+      sections.forEach(sec => {
+        const val = (data[day] && data[day][sec]) ? data[day][sec].join(", ") : "";
+        html += `<td><textarea class="small" id="d${day}_${sec}">${val}</textarea></td>`;
+      });
+      html += "</tr>";
+    });
+
+    html += "</table>";
+    container.innerHTML = html;
+  }
+
+  function applyTableToJSON() {
+    const sections = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
+    const days = ["1", "2", "3", "4", "5", "6", "7", "default", "2025-05-31"];
+    const data = {};
+
+    days.forEach(day => {
+      data[day] = {};
+      sections.forEach(sec => {
+        const id = `d${day}_${sec}`;
+        const val = document.getElementById(id).value.trim();
+        data[day][sec] = val ? val.split(",").map(s => s.trim()).filter(Boolean) : [];
+      });
+    });
+
+    document.getElementById('json').value = JSON.stringify(data, null, 2);
+    output.innerText = "✅ Tabella sincronizzata con JSON.";
+  }
+
   function formatJSON() {
     try {
       const obj = JSON.parse(document.getElementById('json').value);
       document.getElementById('json').value = JSON.stringify(obj, null, 2);
-      output.innerText = "✅ JSON formattato.";
+      buildTableFromJSON(obj);
+      output.innerText = "✅ JSON formattato e tabella aggiornata.";
     } catch (e) {
       output.innerText = "❌ Errore nel JSON: " + e.message;
     }
@@ -85,7 +131,7 @@
   function exportIndex() {
     try {
       const newJSON = document.getElementById('json').value;
-      JSON.parse(newJSON); // Verifica validità
+      JSON.parse(newJSON); // Validità
 
       const newSchedule = `const schedule = ${newJSON};`;
       const replaced = originalHTML.replace(/const schedule\s*=\s*\{[\s\S]*?\};/, newSchedule);
