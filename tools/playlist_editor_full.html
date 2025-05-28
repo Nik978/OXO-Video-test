@@ -1,50 +1,87 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Playlist Editor with Smart Import</title>
+  <title>Playlist Editor</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #111; color: #eee; }
-    textarea { width: 100%; height: 300px; margin-top: 10px; font-family: monospace; }
-    button { padding: 10px; margin: 10px 0; background: #333; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: #555; }
+    body { font-family: monospace; padding: 20px; background: #111; color: #eee; }
+    textarea, input, select, button {
+      font-family: monospace; font-size: 14px;
+      background: #222; color: #0f0; border: 1px solid #444;
+      padding: 5px; margin: 5px 0; width: 100%;
+    }
+    .section { margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+    .section h3 { margin: 10px 0 5px; color: #0f0; }
   </style>
 </head>
 <body>
-  <h1>📺 Playlist Editor</h1>
-  <input type="file" id="fileInput" />
-  <button onclick="parseFile()">Import Schedule</button>
-  <textarea id="jsonOutput" placeholder="Schedule JSON will appear here..."></textarea>
 
-  <script>
-    function parseFile() {
-      const file = document.getElementById('fileInput').files[0];
-      if (!file) return alert("Please select a file.");
+<h1>🎬 Playlist JSON Editor</h1>
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        let text = e.target.result;
-        let extracted = "";
+<input type="file" id="fileInput" accept=".html">
+<button onclick="loadFromFile()">📥 Carica da index.html</button>
+<br><br>
 
-        // Attempt to extract JSON block after 'const schedule ='
-        const match = text.match(/const\s+schedule\s*=\s*({[\s\S]*?})\s*;?\s*$/m);
-        if (match) {
-          extracted = match[1];
-        } else {
-          // Try to parse as pure JSON
-          extracted = text;
-        }
+<textarea id="json" rows="30" placeholder="Incolla qui lo schedule JSON..."></textarea><br>
+<button onclick="formatJSON()">✨ Format</button>
+<button onclick="validateJSON()">✅ Validate</button>
+<button onclick="download()">💾 Download JSON</button>
 
+<pre id="output" style="white-space: pre-wrap; color: #ff8080;"></pre>
+
+<script>
+  function loadFromFile() {
+    const input = document.getElementById('fileInput');
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const text = e.target.result;
+      const match = text.match(/const schedule\s*=\s*(\{[\s\S]*?\});/);
+      if (match) {
         try {
-          const obj = JSON.parse(extracted);
-          document.getElementById('jsonOutput').value = JSON.stringify(obj, null, 2);
-        } catch (err) {
-          alert("Error parsing JSON: " + err.message);
+          const cleaned = match[1].replace(/,\s*}/g, '}'); // elimina virgole finali
+          const parsed = JSON.parse(cleaned);
+          document.getElementById('json').value = JSON.stringify(parsed, null, 2);
+          document.getElementById('output').innerText = "✅ Schedule caricato correttamente!";
+        } catch (e) {
+          document.getElementById('output').innerText = "❌ Errore di parsing JSON: " + e.message;
         }
-      };
-      reader.readAsText(file);
+      } else {
+        document.getElementById('output').innerText = "⚠️ 'schedule' non trovato nel file.";
+      }
+    };
+    reader.readAsText(input.files[0]);
+  }
+
+  function formatJSON() {
+    try {
+      const obj = JSON.parse(document.getElementById('json').value);
+      document.getElementById('json').value = JSON.stringify(obj, null, 2);
+      document.getElementById('output').innerText = "✅ JSON formattato.";
+    } catch (e) {
+      document.getElementById('output').innerText = "❌ Errore nel JSON: " + e.message;
     }
-  </script>
+  }
+
+  function validateJSON() {
+    try {
+      JSON.parse(document.getElementById('json').value);
+      document.getElementById('output').innerText = "✅ JSON valido.";
+    } catch (e) {
+      document.getElementById('output').innerText = "❌ Errore: " + e.message;
+    }
+  }
+
+  function download() {
+    const text = document.getElementById('json').value;
+    const blob = new Blob([text], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "schedule.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+
 </body>
 </html>
