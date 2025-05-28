@@ -2,51 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Playlist Editor</title>
+  <title>OXO Playlist Editor & Exporter</title>
   <style>
-    body { font-family: monospace; padding: 20px; background: #111; color: #eee; }
-    textarea, input, select, button {
+    body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
+    textarea, input, button {
       font-family: monospace; font-size: 14px;
       background: #222; color: #0f0; border: 1px solid #444;
       padding: 5px; margin: 5px 0; width: 100%;
     }
-    .section { margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px; }
-    .section h3 { margin: 10px 0 5px; color: #0f0; }
   </style>
 </head>
 <body>
 
-<h1>🎬 Playlist JSON Editor</h1>
+<h2>🎞️ OXO Schedule Editor + Export to index.html</h2>
 
 <input type="file" id="fileInput" accept=".html">
-<button onclick="loadFromFile()">📥 Carica da index.html</button>
+<button onclick="loadIndex()">📥 Importa index.html</button>
 <br><br>
 
-<textarea id="json" rows="30" placeholder="Incolla qui lo schedule JSON..."></textarea><br>
+<textarea id="json" rows="30" placeholder="Modifica qui il JSON dello schedule..."></textarea>
+<br>
 <button onclick="formatJSON()">✨ Format</button>
 <button onclick="validateJSON()">✅ Validate</button>
-<button onclick="download()">💾 Download JSON</button>
+<button onclick="downloadSchedule()">💾 Scarica schedule.json</button>
+<button onclick="exportIndex()">🚀 Esporta nuovo index.html</button>
 
 <pre id="output" style="white-space: pre-wrap; color: #ff8080;"></pre>
 
 <script>
-  function loadFromFile() {
+  let originalHTML = '';
+
+  function loadIndex() {
     const input = document.getElementById('fileInput');
     const reader = new FileReader();
     reader.onload = function (e) {
-      const text = e.target.result;
-      const match = text.match(/const schedule\s*=\s*(\{[\s\S]*?\});/);
+      originalHTML = e.target.result;
+      const match = originalHTML.match(/const schedule\s*=\s*(\{[\s\S]*?\});/);
       if (match) {
         try {
-          const cleaned = match[1].replace(/,\s*}/g, '}'); // elimina virgole finali
-          const parsed = JSON.parse(cleaned);
-          document.getElementById('json').value = JSON.stringify(parsed, null, 2);
-          document.getElementById('output').innerText = "✅ Schedule caricato correttamente!";
-        } catch (e) {
-          document.getElementById('output').innerText = "❌ Errore di parsing JSON: " + e.message;
+          const clean = match[1].replace(/,\s*}/g, '}');
+          const obj = JSON.parse(clean);
+          document.getElementById('json').value = JSON.stringify(obj, null, 2);
+          output.innerText = "✅ JSON importato da index.html";
+        } catch (err) {
+          output.innerText = "❌ Errore nel parsing: " + err.message;
         }
       } else {
-        document.getElementById('output').innerText = "⚠️ 'schedule' non trovato nel file.";
+        output.innerText = "⚠️ Schedule non trovato nel file.";
       }
     };
     reader.readAsText(input.files[0]);
@@ -56,30 +58,48 @@
     try {
       const obj = JSON.parse(document.getElementById('json').value);
       document.getElementById('json').value = JSON.stringify(obj, null, 2);
-      document.getElementById('output').innerText = "✅ JSON formattato.";
+      output.innerText = "✅ JSON formattato.";
     } catch (e) {
-      document.getElementById('output').innerText = "❌ Errore nel JSON: " + e.message;
+      output.innerText = "❌ Errore nel JSON: " + e.message;
     }
   }
 
   function validateJSON() {
     try {
       JSON.parse(document.getElementById('json').value);
-      document.getElementById('output').innerText = "✅ JSON valido.";
+      output.innerText = "✅ JSON valido.";
     } catch (e) {
-      document.getElementById('output').innerText = "❌ Errore: " + e.message;
+      output.innerText = "❌ Errore nel JSON: " + e.message;
     }
   }
 
-  function download() {
+  function downloadSchedule() {
     const text = document.getElementById('json').value;
     const blob = new Blob([text], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
+    a.href = URL.createObjectURL(blob);
     a.download = "schedule.json";
     a.click();
-    URL.revokeObjectURL(url);
+  }
+
+  function exportIndex() {
+    try {
+      const newJSON = document.getElementById('json').value;
+      JSON.parse(newJSON); // Verifica validità
+
+      const newSchedule = `const schedule = ${newJSON};`;
+      const replaced = originalHTML.replace(/const schedule\s*=\s*\{[\s\S]*?\};/, newSchedule);
+
+      const blob = new Blob([replaced], { type: "text/html" });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "index.html";
+      a.click();
+
+      output.innerText = "✅ Nuovo index.html generato!";
+    } catch (e) {
+      output.innerText = "❌ Errore: " + e.message;
+    }
   }
 </script>
 
