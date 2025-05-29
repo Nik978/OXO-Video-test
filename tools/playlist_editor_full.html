@@ -65,10 +65,10 @@
   function buildTableFromJSON(data) {
     const container = document.getElementById('tableContainer');
     const sections = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
-    const days = ["1", "2", "3", "4", "5", "6", "7", "default", "2025-05-31"];
+    const giorni = Object.keys(data);
     let html = "<table><tr><th>Giorno</th>" + sections.map(s => `<th>${s}</th>`).join('') + "</tr>";
 
-    days.forEach(day => {
+    giorni.forEach(day => {
       html += `<tr><td>${day}</td>`;
       sections.forEach(sec => {
         const val = (data[day] && data[day][sec]) ? data[day][sec].join(", ") : "";
@@ -83,14 +83,17 @@
 
   function applyTableToJSON() {
     const sections = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
-    const days = ["1", "2", "3", "4", "5", "6", "7", "default", "2025-05-31"];
+    const rows = document.querySelectorAll("#tableContainer table tr");
     const data = {};
 
-    days.forEach(day => {
+    rows.forEach((row, i) => {
+      if (i === 0) return;
+      const cells = row.querySelectorAll("td");
+      const day = cells[0].innerText.trim();
       data[day] = {};
-      sections.forEach(sec => {
-        const id = `d${day}_${sec}`;
-        const val = document.getElementById(id).value.trim();
+      sections.forEach((sec, j) => {
+        const textarea = cells[j + 1].querySelector("textarea");
+        const val = textarea.value.trim();
         data[day][sec] = val ? val.split(",").map(s => s.trim()).filter(Boolean) : [];
       });
     });
@@ -131,22 +134,20 @@
   function exportIndex() {
     try {
       const newJSON = document.getElementById('json').value;
-      JSON.parse(newJSON); // Validità
-
+      JSON.parse(newJSON);
       const newSchedule = `const schedule = ${newJSON};`;
       const replaced = originalHTML.replace(/const schedule\s*=\s*\{[\s\S]*?\};/, newSchedule);
-
       const blob = new Blob([replaced], { type: "text/html" });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = "index.html";
       a.click();
-
       output.innerText = "✅ Nuovo index.html generato!";
     } catch (e) {
       output.innerText = "❌ Errore: " + e.message;
     }
   }
+
 </script>
 
 </body>
