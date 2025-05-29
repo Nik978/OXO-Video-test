@@ -4,102 +4,119 @@
   <meta charset="UTF-8">
   <title>OXO Playlist Editor Pro</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; background: #111; color: #eee; }
-    h2 { color: #4caf50; }
-    input[type="text"] { width: 200px; padding: 5px; margin-bottom: 10px; }
-    textarea { width: 100%; height: 60px; margin: 5px 0; }
-    button { margin: 5px; padding: 8px 12px; background: #333; color: #eee; border: 1px solid #555; cursor: pointer; }
-    .section { border: 1px solid #555; padding: 10px; margin-bottom: 15px; background: #222; }
-    .day { margin-bottom: 25px; }
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #fff;
+      padding: 20px;
+    }
+    textarea, input {
+      font-family: monospace;
+      background: #222;
+      color: #0f0;
+      border: 1px solid #555;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background: #333;
+      color: #fff;
+      padding: 5px 10px;
+      margin: 5px 0;
+      border: none;
+    }
+    .day-section {
+      border: 1px solid #444;
+      margin: 10px 0;
+      padding: 10px;
+    }
   </style>
 </head>
 <body>
 
 <h1>🎬 OXO Playlist Editor Pro</h1>
 
-<label for="addDate">➕ Aggiungi nuova data (YYYY-MM-DD):</label>
-<input type="text" id="addDate" placeholder="es. 2025-06-01">
-<button onclick="addDate()">Aggiungi</button>
+<label>Aggiungi nuova data (YYYY-MM-DD):</label>
+<input type="text" id="customDate" placeholder="es. 2025-06-01">
+<button onclick="addCustomDate()">➕ Aggiungi</button>
+
+<br><br>
+<button onclick="downloadJSON()">📦 Esporta JSON</button>
+<button onclick="generateIndex()">🛠️ Genera index.html</button>
+<input type="file" accept=".html" onchange="importSchedule(event)">
+<button onclick="downloadHTML()">💾 Salva HTML editor</button>
 
 <div id="editor"></div>
 
-<button onclick="exportSchedule()">💾 Esporta JSON</button>
-<button onclick="generateIndex()">🧩 Genera index.html</button>
-<input type="file" accept=".html,.json" onchange="importSchedule(event)">
-<button onclick="downloadHTML()">⬇️ Salva HTML editor</button>
-
-<hr>
-<pre id="output" style="white-space: pre-wrap; background:#000; color:#0f0; padding: 10px;"></pre>
+<pre id="output"></pre>
 
 <script>
 let schedule = {
-  default: {
-    Happy_Hour: [], Standard_1: [], DJ: [], Standard_2: []
-  },
-  1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}
+  "1": {}, "2": {}, "3": {}, "4": {}, "5": {}, "6": {}, "7": {},
+  "default": {}
 };
 
 const sections = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
 
 function renderEditor() {
-  const container = document.getElementById('editor');
-  container.innerHTML = '';
+  const editor = document.getElementById("editor");
+  editor.innerHTML = '';
   for (const day in schedule) {
-    const dayDiv = document.createElement('div');
-    dayDiv.className = 'day';
-    dayDiv.innerHTML = `<h2>📅 Giorno: ${day}</h2>`;
+    const div = document.createElement("div");
+    div.className = "day-section";
+    div.innerHTML = `<h3>📅 ${day}</h3>`;
     sections.forEach(section => {
-      const val = (schedule[day][section] || []).join(', ');
-      dayDiv.innerHTML += `
-        <div class="section">
-          <strong>🔹 ${section}</strong><br>
-          <textarea oninput="updateSchedule('${day}', '${section}', this.value)">${val}</textarea>
-        </div>`;
+      const value = (schedule[day][section] || []).join(", ");
+      div.innerHTML += `
+        <label>${section}</label><br>
+        <textarea rows="2" onchange="updateSchedule('${day}', '${section}', this.value)">${value}</textarea><br>
+      `;
     });
-    container.appendChild(dayDiv);
+    editor.appendChild(div);
   }
+  document.getElementById("output").textContent = JSON.stringify(schedule, null, 2);
 }
 
 function updateSchedule(day, section, value) {
-  schedule[day][section] = value.split(',').map(s => s.trim()).filter(Boolean);
+  const items = value.split(',').map(s => s.trim()).filter(Boolean);
+  if (!schedule[day]) schedule[day] = {};
+  schedule[day][section] = items;
+  document.getElementById("output").textContent = JSON.stringify(schedule, null, 2);
 }
 
-function addDate() {
-  const date = document.getElementById('addDate').value.trim();
+function addCustomDate() {
+  const date = document.getElementById("customDate").value.trim();
   if (date && !schedule[date]) {
-    schedule[date] = { Happy_Hour: [], Standard_1: [], DJ: [], Standard_2: [] };
+    schedule[date] = {};
     renderEditor();
   }
 }
 
-function exportSchedule() {
-  const out = JSON.stringify(schedule, null, 2);
-  document.getElementById('output').textContent = out;
+function downloadJSON() {
+  const blob = new Blob([JSON.stringify(schedule, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "schedule.json";
+  a.click();
 }
 
 function generateIndex() {
-  const json = JSON.stringify(schedule, null, 2);
-  const indexHTML = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>OXO Scheduler</title></head>
-<body>
-<script>
-const schedule = ${json};
-</script>
-</body>
-</html>`;
-  document.getElementById('output').textContent = indexHTML.trim();
+  const indexHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>OXO Scheduler</title></head><body><script>const schedule = ${JSON.stringify(schedule, null, 2)};</script></body></html>`;
+  const blob = new Blob([indexHTML], { type: "text/html" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "index.html";
+  a.click();
 }
 
 function importSchedule(event) {
   const reader = new FileReader();
   reader.onload = () => {
+    const text = reader.result;
     try {
-      const text = reader.result;
-      if (text.includes("const schedule =")) {
-        const match = text.match(/const schedule\s*=\s*({[\s\S]*?})\s*;/);
-        if (match) schedule = JSON.parse(match[1]);
+      const match = text.match(/schedule\s*=\s*({[\s\S]*?});/);
+      if (match && match[1]) {
+        schedule = JSON.parse(match[1]);
       } else {
         schedule = JSON.parse(text);
       }
@@ -115,7 +132,7 @@ function downloadHTML() {
   const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'playlist_editor_pro.html';
+  a.download = 'playlist_editor_full.html';
   a.click();
 }
 
