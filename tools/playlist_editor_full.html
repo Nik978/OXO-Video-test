@@ -1,5 +1,6 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="="en">
 <head>
   <meta charset="UTF-8">
   <title>OXO Playlist Editor Pro</title>
@@ -22,8 +23,9 @@
       background: #333;
       color: #fff;
       padding: 5px 10px;
-      margin: 5px 0;
+      margin: 5px 5px 10px 0;
       border: none;
+      cursor: pointer;
     }
     .day-section {
       border: 1px solid #444;
@@ -47,7 +49,6 @@
 <button onclick="downloadHTML()">💾 Salva HTML editor</button>
 
 <div id="editor"></div>
-
 <pre id="output"></pre>
 
 <script>
@@ -55,7 +56,6 @@ let schedule = {
   "1": {}, "2": {}, "3": {}, "4": {}, "5": {}, "6": {}, "7": {},
   "default": {}
 };
-
 const sections = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
 
 function renderEditor() {
@@ -101,7 +101,9 @@ function downloadJSON() {
 }
 
 function generateIndex() {
-  const indexHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>OXO Scheduler</title></head><body><script>const schedule = ${JSON.stringify(schedule, null, 2)};</script></body></html>`;
+  const indexHTML = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>OXO Scheduler</title></head>
+<body><script>const schedule = ${JSON.stringify(schedule, null, 2)};</script></body></html>`;
   const blob = new Blob([indexHTML], { type: "text/html" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -114,7 +116,7 @@ function importSchedule(event) {
   reader.onload = () => {
     const text = reader.result;
     try {
-      const match = text.match(/schedule\s*=\s*({[\s\S]*?});/);
+      const match = text.match(/schedule\s*=\s*({[\s\S]*?})\s*;/);
       if (match && match[1]) {
         schedule = JSON.parse(match[1]);
       } else {
