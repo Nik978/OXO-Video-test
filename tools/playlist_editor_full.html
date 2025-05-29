@@ -1,135 +1,125 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>OXO Full Playlist Editor</title>
+  <title>OXO Playlist Editor Pro</title>
   <style>
-    body { font-family: monospace; padding: 20px; background: #111; color: #eee; }
-    h2 { color: #7fffd4; }
-    label { display: inline-block; width: 120px; vertical-align: top; }
-    textarea, input { width: 80%; background: #222; color: #eee; border: 1px solid #444; padding: 4px; margin-bottom: 10px; }
-    textarea { height: 40px; }
-    .section { margin-bottom: 20px; border-bottom: 1px dashed #555; padding-bottom: 10px; }
-    .day { margin-bottom: 20px; background: #1e1e1e; padding: 10px; border: 1px solid #444; }
-    .json-output { background: #222; color: #0f0; padding: 10px; margin-top: 20px; white-space: pre-wrap; }
-    button { background: #333; color: #fff; padding: 8px 16px; border: none; cursor: pointer; margin: 5px; }
-    button:hover { background: #555; }
-    input.date { width: 160px; }
+    body { font-family: sans-serif; margin: 20px; background: #111; color: #eee; }
+    h2 { color: #4caf50; }
+    input[type="text"] { width: 200px; padding: 5px; margin-bottom: 10px; }
+    textarea { width: 100%; height: 60px; margin: 5px 0; }
+    button { margin: 5px; padding: 8px 12px; background: #333; color: #eee; border: 1px solid #555; cursor: pointer; }
+    .section { border: 1px solid #555; padding: 10px; margin-bottom: 15px; background: #222; }
+    .day { margin-bottom: 25px; }
   </style>
 </head>
 <body>
 
-<h1>OXO Full Playlist Editor</h1>
+<h1>🎬 OXO Playlist Editor Pro</h1>
 
-<div>
-  <label>Import from index.html:</label>
-  <input type="file" id="indexFileInput">
-</div>
-
-<div>
-  <label>Add custom date:</label>
-  <input class="date" type="text" id="customDate" placeholder="yyyy-mm-dd">
-  <button onclick="addDate()">➕ Add</button>
-</div>
+<label for="addDate">➕ Aggiungi nuova data (YYYY-MM-DD):</label>
+<input type="text" id="addDate" placeholder="es. 2025-06-01">
+<button onclick="addDate()">Aggiungi</button>
 
 <div id="editor"></div>
 
-<button onclick="generateJSON()">📦 Export JSON</button>
+<button onclick="exportSchedule()">💾 Esporta JSON</button>
+<button onclick="generateIndex()">🧩 Genera index.html</button>
+<input type="file" accept=".html,.json" onchange="importSchedule(event)">
+<button onclick="downloadHTML()">⬇️ Salva HTML editor</button>
 
-<pre id="output" class="json-output"></pre>
+<hr>
+<pre id="output" style="white-space: pre-wrap; background:#000; color:#0f0; padding: 10px;"></pre>
 
 <script>
-  const sectionNames = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
-  const defaultDays = ["default", "1", "2", "3", "4", "5", "6", "7"];
-  const schedule = {};
+let schedule = {
+  default: {
+    Happy_Hour: [], Standard_1: [], DJ: [], Standard_2: []
+  },
+  1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}
+};
 
-  function createEditor(day) {
-    const div = document.createElement("div");
-    div.className = "day";
-    div.id = "day_" + day;
+const sections = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
 
-    const title = document.createElement("h2");
-    title.textContent = (day === "default" ? "Default (Fallback)" :
-      isNaN(day) ? `Date: ${day}` : `Day ${day}`);
-    div.appendChild(title);
-
-    sectionNames.forEach(section => {
-      const sec = document.createElement("div");
-      sec.className = "section";
-
-      const label = document.createElement("label");
-      label.textContent = section;
-      sec.appendChild(label);
-
-      const textarea = document.createElement("textarea");
-      textarea.id = `${day}_${section}`;
-      textarea.placeholder = "Comma-separated video list";
-      sec.appendChild(textarea);
-
-      div.appendChild(sec);
+function renderEditor() {
+  const container = document.getElementById('editor');
+  container.innerHTML = '';
+  for (const day in schedule) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day';
+    dayDiv.innerHTML = `<h2>📅 Giorno: ${day}</h2>`;
+    sections.forEach(section => {
+      const val = (schedule[day][section] || []).join(', ');
+      dayDiv.innerHTML += `
+        <div class="section">
+          <strong>🔹 ${section}</strong><br>
+          <textarea oninput="updateSchedule('${day}', '${section}', this.value)">${val}</textarea>
+        </div>`;
     });
-
-    document.getElementById("editor").appendChild(div);
+    container.appendChild(dayDiv);
   }
+}
 
-  function generateJSON() {
-    const json = {};
-    document.querySelectorAll(".day").forEach(dayDiv => {
-      const dayKey = dayDiv.id.replace("day_", "");
-      json[dayKey] = {};
+function updateSchedule(day, section, value) {
+  schedule[day][section] = value.split(',').map(s => s.trim()).filter(Boolean);
+}
 
-      sectionNames.forEach(section => {
-        const val = document.getElementById(`${dayKey}_${section}`).value;
-        if (val.trim()) {
-          json[dayKey][section] = val.split(",").map(s => s.trim());
-        }
-      });
-    });
-
-    document.getElementById("output").textContent = JSON.stringify(json, null, 2);
+function addDate() {
+  const date = document.getElementById('addDate').value.trim();
+  if (date && !schedule[date]) {
+    schedule[date] = { Happy_Hour: [], Standard_1: [], DJ: [], Standard_2: [] };
+    renderEditor();
   }
+}
 
-  function addDate() {
-    const date = document.getElementById("customDate").value.trim();
-    if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      alert("Invalid date format. Use yyyy-mm-dd");
-      return;
-    }
-    if (document.getElementById("day_" + date)) {
-      alert("Date already exists!");
-      return;
-    }
-    createEditor(date);
-  }
+function exportSchedule() {
+  const out = JSON.stringify(schedule, null, 2);
+  document.getElementById('output').textContent = out;
+}
 
-  document.getElementById("indexFileInput").addEventListener("change", function(event) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const text = e.target.result;
-      const match = text.match(/const schedule = ({[\s\S]+?});/);
-      if (match) {
-        try {
-          const imported = eval("(" + match[1] + ")");
-          for (const [day, sections] of Object.entries(imported)) {
-            if (!document.getElementById("day_" + day)) createEditor(day);
-            for (const [section, videos] of Object.entries(sections)) {
-              const input = document.getElementById(`${day}_${section}`);
-              if (input) input.value = videos.join(", ");
-            }
-          }
-          alert("Schedule imported from index.html!");
-        } catch (e) {
-          alert("Failed to parse schedule.");
-        }
+function generateIndex() {
+  const json = JSON.stringify(schedule, null, 2);
+  const indexHTML = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>OXO Scheduler</title></head>
+<body>
+<script>
+const schedule = ${json};
+</script>
+</body>
+</html>`;
+  document.getElementById('output').textContent = indexHTML.trim();
+}
+
+function importSchedule(event) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const text = reader.result;
+      if (text.includes("const schedule =")) {
+        const match = text.match(/const schedule\s*=\s*({[\s\S]*?})\s*;/);
+        if (match) schedule = JSON.parse(match[1]);
       } else {
-        alert("No schedule found in the file.");
+        schedule = JSON.parse(text);
       }
-    };
-    reader.readAsText(event.target.files[0]);
-  });
+      renderEditor();
+    } catch (e) {
+      alert("❌ Errore nel parsing: " + e.message);
+    }
+  };
+  reader.readAsText(event.target.files[0]);
+}
 
-  defaultDays.forEach(createEditor);
+function downloadHTML() {
+  const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'playlist_editor_pro.html';
+  a.click();
+}
+
+renderEditor();
 </script>
 
 </body>
