@@ -48,6 +48,7 @@ const debug = document.getElementById('debug');
 const countdownBox = document.getElementById('countdown');
 const logoUrl = "TV/logo.png";
 const versione = "TV";
+const dateStr = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
 const schedule = {
   "1": {
@@ -257,7 +258,6 @@ function playNext() {
   logoVideo.pause();
   logoVideo.style.display = "none";
 
-const dateStr = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 const today = schedule[dateStr] || schedule[day] || schedule["default"];
 playlist = today[section];
 
