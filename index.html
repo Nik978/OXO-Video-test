@@ -235,8 +235,10 @@ function playNext() {
   logoVideo.pause();
   logoVideo.style.display = "none";
 
-  const today = schedule[day] || schedule["default"];
-  playlist = today[section];
+const dateStr = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+const today = schedule[dateStr] || schedule[day] || schedule["default"];
+playlist = today[section];
+
   if (!playlist || playlist.length === 0) {
     playlist = schedule["default"][section] || [];
   }
