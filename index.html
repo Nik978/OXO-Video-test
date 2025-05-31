@@ -34,13 +34,16 @@
 <body>
 
 <video id="video" autoplay muted playsinline></video>
-<img id="logo" src="TV/logo.png" alt="Logo" />
+<video id="logoVideo" autoplay muted loop playsinline style="display: none;">
+<source src="TV/logo.mp4" type="video/mp4">
+</video>
 <div id="countdown"></div>
 <div id="debug"></div>
 
+
 <script>
 const video = document.getElementById('video');
-const logo = document.getElementById('logo');
+const logoVideo = document.getElementById('logoVideo');
 const debug = document.getElementById('debug');
 const countdownBox = document.getElementById('countdown');
 const logoUrl = "TV/logo.png";
@@ -220,13 +223,18 @@ function playNext() {
   if (!active) {
     video.pause();
     video.style.display = "none";
-    logo.style.display = "block";
+
+    logoVideo.style.display = "block";
+    logoVideo.play();
+
     updateDebug(day, section, "-");
     countdownBox.style.display = "none";
     return;
   }
 
-  logo.style.display = "none";
+  logoVideo.pause();
+  logoVideo.style.display = "none";
+
   const today = schedule[day] || schedule["default"];
   playlist = today[section];
   if (!playlist || playlist.length === 0) {
@@ -257,6 +265,7 @@ function playNext() {
 
   current++;
 }
+
 
 video.addEventListener('ended', playNext);
 window.addEventListener('load', playNext);
