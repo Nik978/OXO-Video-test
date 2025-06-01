@@ -215,7 +215,7 @@ let countdownTimer = null;
 function updateDebug(day, section, name) {
   debug.innerText =
     `🕒 Time: ${new Date().toLocaleTimeString()}\n` +
-    `📅 Date: ${dateStr} (Day ${day})\n` +
+    `📅 Source: ${schedule[dateStr] ? 'Specific ' + dateStr : 'Weekday Day ' + day}\n` +
     `🎯 Section: ${section}\n` +
     `🎞️ Video: ${name}\n` +
     `📦 Version: ${versione}`;
