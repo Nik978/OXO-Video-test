@@ -71,29 +71,38 @@ const schedule = {
   },
   "4": {
     "Happy_Hour": [
+      "Intro.mp4",
       "Bucket.mp4",
       "Happy.mp4",
       "Bucket.mp4",
-      "Happy.mp4",
-      "Football.mp4"
+      "Happy.mp4"
     ],
     "Standard_1": [
       "Intro.mp4",
       "Bucket.mp4",
-      "Football.mp4",
-      "Bucket.mp4"
+      "Bucket.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4",
+      "Bucket.mp4",
+      "Happy.mp4"
     ],
     "DJ": [
       "Intro.mp4",
       "Bucket.mp4",
-      "Football.mp4",
-      "Bucket.mp4"
+      "Bucket.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4",
+      "Bucket.mp4",
+      "Happy.mp4"
     ],
     "Standard_2": [
       "Intro.mp4",
       "Bucket.mp4",
-      "Football.mp4",
-      "Bucket.mp4"
+      "Bucket.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4",
+      "Bucket.mp4",
+      "Happy.mp4"
     ]
   },
   "5": {
@@ -103,10 +112,40 @@ const schedule = {
     "Standard_2": []
   },
   "6": {
-    "Happy_Hour": [],
-    "Standard_1": [],
-    "DJ": [],
-    "Standard_2": []
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4"
+    ]
   },
   "7": {
     "Happy_Hour": [],
@@ -143,41 +182,13 @@ const schedule = {
       "Bucket.mp4",
       "Cosplay.mp4"
     ]
-  },
-  "2025-05-31": {
-    "Happy_Hour": [
-      "Happy.mp4",
-      "Football.mp4",
-      "Happy.mp4",
-      "Cosplay.mp4",
-      "Football.mp4",
-      "Happy.mp4",
-      "Cosplay.mp4"
-    ],
-    "Standard_1": [
-      "Football.mp4",
-      "Football.mp4",
-      "Cosplay.mp4",
-      "Football.mp4",
-      "Football.mp4"
-    ],
-    "DJ": [
-      "Football.mp4",
-      "Football.mp4",
-      "Cosplay.mp4",
-      "Football.mp4",
-      "Football.mp4"
-    ],
-    "Standard_2": [
-      "Football.mp4",
-      "Football.mp4",
-      "Cosplay.mp4",
-      "Football.mp4",
-      "Football.mp4"
-    ]
   }
-}
+}; // fine schedule
+
+// ---- Fine JSON parsing ----
+
 const base = "TV/";
+
 const videoMap = {};
 Object.values(schedule).forEach(day => {
   Object.values(day).flat().forEach(name => {
