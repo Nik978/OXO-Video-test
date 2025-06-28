@@ -278,7 +278,6 @@ const schedule = {
   }
 }; // fine schedule
 
-
 // ---- Fine JSON parsing ----
 
 const base = "TV/";
@@ -326,10 +325,11 @@ function updateDebug(day, section, name) {
     `📦 Version: ${versione}`;
 }
 
-function updateCountdown() {
+function updateCountdown(targetHour) {
   const now = new Date();
   const target = new Date();
-  target.setHours(21, 0, 0, 0);
+
+  target.setHours(targetHour, 0, 0, 0);
   if (now > target) target.setDate(target.getDate() + 1);
 
   const diff = target - now;
@@ -344,21 +344,32 @@ function isHappyCountdownActive(min) {
   return min >= 1140 && min < 1260; // 19:00–21:00
 }
 
+function isFootballCountdownActive(min) {
+  return min >= 1140 && min < 1380; // 19:00–23:00
+}
+
+
 function playNext() {
   const { day, min, section } = getDayAndSection();
   const active = !(section === "Closed");
 
-  if (!active) {
-    video.pause();
-    video.style.display = "none";
+if (!active) {
+  video.pause();
+  video.style.display = "none";
 
-    logoVideo.style.display = "block";
-    logoVideo.play();
+  logoVideo.style.display = "block";
+  logoVideo.play();
 
-    updateDebug(day, section, "-");
-    countdownBox.style.display = "none";
-    return;
-  }
+  updateDebug(day, section, "-");
+  countdownBox.style.display = "none";
+
+  // ✅ Aggiunta per rientrare automaticamente dopo il logo
+  setTimeout(() => {
+    playNext();
+  }, 60000); // ogni 60 sec controlla se passare alla sezione successiva
+
+  return;
+}
 
   logoVideo.pause();
   logoVideo.style.display = "none";
@@ -383,14 +394,20 @@ playlist = today[section];
   video.play();
   updateDebug(day, section, name);
 
-  if (name.includes("Happy") && isHappyCountdownActive(min)) {
-    countdownBox.style.display = "block";
-    updateCountdown();
-    countdownTimer = setInterval(updateCountdown, 1000);
-  } else {
-    countdownBox.style.display = "none";
-    clearInterval(countdownTimer);
-  }
+clearInterval(countdownTimer);
+
+if (name.includes("Happy") && isHappyCountdownActive(min)) {
+  countdownBox.style.display = "block";
+  updateCountdown(21); // ⏰ Happy ends at 21:00
+  countdownTimer = setInterval(() => updateCountdown(21), 1000);
+} else if (name.includes("Football") && isFootballCountdownActive(min)) {
+  countdownBox.style.display = "block";
+  updateCountdown(23); // 🏈 Football ends at 23:00
+  countdownTimer = setInterval(() => updateCountdown(23), 1000);
+} else {
+  countdownBox.style.display = "none";
+}
+
 
   current++;
 }
