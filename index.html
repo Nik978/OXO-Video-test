@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OXO Scheduler</title>
+  <style>
+    body { margin: 0; background: black; font-family: monospace; }
+    video { width: 100vw; height: 100vh; object-fit: cover; display: none; }
+    #logo {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 80vw; max-height: 80vh;
+      display: none;
+    }
+    #debug {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 16px;
+      color: #0f0;
+    }
+    #countdown {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 5em;
+      font-weight: bold;
+      color: #fff;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<video id="video" autoplay muted playsinline></video>
+<video id="logoVideo" autoplay muted loop playsinline style="display: none;">
+<source src="TV/logo.mp4" type="video/mp4">
+</video>
+<div id="countdown"></div>
+<div id="debug"></div>
+
+
+<script>
+const video = document.getElementById('video');
+const logoVideo = document.getElementById('logoVideo');
+const debug = document.getElementById('debug');
+const countdownBox = document.getElementById('countdown');
+const logoUrl = "TV/logo.png";
+const versione = "TV";
+const dateStr = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+const schedule = {
+  "1": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "2": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "3": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "4": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Bucket.mp4",
+      "Happy.mp4",
+      "Bucket.mp4",
+      "Happy.mp4",
+      "Mimi.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Bucket.mp4",
+      "Bucket.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4",
+      "Bucket.mp4",
+      "Happy.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Bucket.mp4",
+      "Bucket.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4",
+      "Bucket.mp4",
+      "Happy.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Bucket.mp4",
+      "Bucket.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4",
+      "Bucket.mp4",
+      "Happy.mp4"
+    ]
+  },
+  "5": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "6": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4"
+    ]
+  },
+  "7": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "default": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Happy.mp4",
+      "Bucket.mp4",
+      "Happy.mp4",
+      "Happy.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Happy.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Bucket.mp4",
+      "Cosplay.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Bucket.mp4",
+      "Cosplay.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Bucket.mp4",
+      "Cosplay.mp4"
+    ]
+  },
+  "2025-06-29": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  }
+}; // fine schedule
+
+// ---- Fine JSON parsing ----
+
+const base = "TV/";
+
+const videoMap = {};
+Object.values(schedule).forEach(day => {
+  Object.values(day).flat().forEach(name => {
+    videoMap[name] = base + name;
+  });
+});
+
+function getDayAndSection() {
+  const now = new Date();
+  let day = now.getDay();
+  if (day === 0) day = 7;
+
+  const h = now.getHours(), m = now.getMinutes();
+  const min = h * 60 + m;
+
+  if (min < 300) {
+    day -= 1;
+    if (day < 1) day = 7;
+  }
+
+  let section = "Closed";
+  if (min >= 1110 && min < 1260) section = "Happy_Hour";     // 18:30–21:00
+  else if (min >= 1260 && min < 1320) section = "Standard_1"; // 21:00–22:00
+  else if (min >= 1320 || min < 120) section = "DJ";          // 22:00–02:00
+  else if (min >= 120 && min < 300)  section = "Standard_2";  // 02:00–05:00
+  else if (min >= 300 && min < 1110) section = "Closed";      // 05:00–18:30
+
+  return { day, min, section };
+}
+
+let current = 0;
+let playlist = [];
+let countdownTimer = null;
+
+function updateDebug(day, section, name) {
+  debug.innerText =
+    `🕒 Time: ${new Date().toLocaleTimeString()}\n` +
+    `📅 Source: ${schedule[dateStr] ? 'Specific ' + dateStr : 'Weekday Day ' + day}\n` +
+    `🎯 Section: ${section}\n` +
+    `🎞️ Video: ${name}\n` +
+    `📦 Version: ${versione}`;
+}
+
+function updateCountdown(targetHour) {
+  const now = new Date();
+  const target = new Date();
+
+  target.setHours(targetHour, 0, 0, 0);
+  if (now > target) target.setDate(target.getDate() + 1);
+
+  const diff = target - now;
+  const h = Math.floor(diff / 1000 / 60 / 60);
+  const m = Math.floor((diff / 1000 / 60) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+
+  countdownBox.innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function isHappyCountdownActive(min) {
+  return min >= 1140 && min < 1260; // 19:00–21:00
+}
+
+function isFootballCountdownActive(min) {
+  return min >= 1140 && min < 1380; // 19:00–23:00
+}
+
+
+function playNext() {
+  const { day, min, section } = getDayAndSection();
+  const active = !(section === "Closed");
+
+if (!active) {
+  video.pause();
+  video.style.display = "none";
+
+  logoVideo.style.display = "block";
+  logoVideo.play();
+
+  updateDebug(day, section, "-");
+  countdownBox.style.display = "none";
+
+  // ✅ Aggiunta per rientrare automaticamente dopo il logo
+  setTimeout(() => {
+    playNext();
+  }, 60000); // ogni 60 sec controlla se passare alla sezione successiva
+
+  return;
+}
+
+  logoVideo.pause();
+  logoVideo.style.display = "none";
+
+const today = schedule[dateStr] || schedule[day] || schedule["default"];
+playlist = today[section];
+
+  if (!playlist || playlist.length === 0) {
+    playlist = schedule["default"][section] || [];
+  }
+
+  if (playlist.length === 0) {
+    video.style.display = "none";
+    updateDebug(day, section, "No video");
+    return;
+  }
+
+  const name = playlist[current % playlist.length];
+  const src = videoMap[name];
+  video.src = src;
+  video.style.display = "block";
+  video.play();
+  updateDebug(day, section, name);
+
+clearInterval(countdownTimer);
+
+if (name.includes("Happy") && isHappyCountdownActive(min)) {
+  countdownBox.style.display = "block";
+  updateCountdown(21); // ⏰ Happy ends at 21:00
+  countdownTimer = setInterval(() => updateCountdown(21), 1000);
+} else if (name.includes("Football") && isFootballCountdownActive(min)) {
+  countdownBox.style.display = "block";
+  updateCountdown(23); // 🏈 Football ends at 23:00
+  countdownTimer = setInterval(() => updateCountdown(23), 1000);
+} else {
+  countdownBox.style.display = "none";
+}
+
+
+  current++;
+}
+
+
+video.addEventListener('ended', playNext);
+window.addEventListener('load', playNext);
+</script>
+
+</body>
+</html>
