@@ -273,15 +273,6 @@ let current = 0;
 let playlist = [];
 let countdownTimer = null;
 
-function updateDebug(day, section, name) {
-  debug.innerText =
-    `🕒 Time: ${new Date().toLocaleTimeString()}\n` +
-    `📅 Source: ${schedule[dateStr] ? 'Specific ' + dateStr : 'Weekday Day ' + day}\n` +
-    `🎯 Section: ${section}\n` +
-    `🎞️ Video: ${name}\n` +
-    `📦 Version: ${versione}`;
-}
-
 function updateCountdown(targetHour) {
   const now = new Date();
   const target = new Date();
