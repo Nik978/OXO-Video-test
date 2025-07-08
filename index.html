@@ -17,7 +17,7 @@
     #countdown {
       position: absolute;
       top: 20px;
-      left: 20%;
+      left: 30%;
       transform: translateX(-50%);
       font-size: 5em;
       font-weight: bold;
@@ -39,7 +39,6 @@
 <script>
 const video = document.getElementById('video');
 const logoVideo = document.getElementById('logoVideo');
-const debug = document.getElementById('debug');
 const countdownBox = document.getElementById('countdown');
 const logoUrl = "TV/logo.png";
 const versione = "TV";
@@ -293,7 +292,7 @@ function isHappyCountdownActive(min) {
 }
 
 function isFootballCountdownActive(min) {
-  return min >= 1140 && min < 1980; // 19:00–02:00
+  return min >= 1140 && min < 1380; // 19:00–22:00
 }
 
 
