@@ -33,8 +33,8 @@
       position: absolute;
       bottom: 10px;
       left: 10px;
-      color: green;
-      font-size: 3em;
+      color: #FFFFFF;
+      font-size: 2em;
       font-weight: bold;
       white-space: pre-line;
     }
@@ -173,11 +173,9 @@ const schedule = {
       "Intro.mp4",
       "Happy.mp4",
       "Happy.mp4",
-      "Football.mp4",
       "Bucket.mp4",
       "Happy.mp4",
       "Happy.mp4",
-      "Football.mp4",
       "Cosplay.mp4",
       "Happy.mp4",
       "Happy.mp4"
@@ -186,22 +184,19 @@ const schedule = {
       "Intro.mp4",
       "Happy.mp4",
       "Bucket.mp4",
-      "Cosplay.mp4",
-      "Football.mp4"
+      "Cosplay.mp4"
     ],
     "DJ": [
       "Intro.mp4",
       "Happy.mp4",
       "Bucket.mp4",
-      "Cosplay.mp4",
-      "Football.mp4"
+      "Cosplay.mp4"
     ],
     "Standard_2": [
       "Intro.mp4",
       "Happy.mp4",
       "Bucket.mp4",
-      "Cosplay.mp4",
-      "Football.mp4"
+      "Cosplay.mp4"
     ]
   },
   "2025-07-09": {
@@ -286,9 +281,9 @@ let countdownTimer = null;
 function updateDebug(day, section, name) {
   debug.innerText =
     `🕒 Time: ${new Date().toLocaleTimeString()}\n` +
-    `📅 Source: ${schedule[dateStr] ? 'Specific ' + dateStr : 'Default'}\n` +
-    `🎯 Section: ${section}\n` +
-    `🎞️ Video: ${name}\n` +
+    `📅 Day schedule: ${schedule[dateStr] ? 'Specific ' + dateStr : 'Default'}\n` +
+    `🎯 Section schedule: ${section}\n` +
+    `🎞️ Video clip: ${name}\n` +
     `📦 Version: ${versione}`;
 }
 
