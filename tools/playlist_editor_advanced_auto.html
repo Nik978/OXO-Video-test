@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OXO Playlist Editor Advanced</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
+    textarea, input, button {
+      font-family: monospace; font-size: 14px;
+      background: #222; color: #0f0; border: 1px solid #444;
+      padding: 5px; margin: 5px 0;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    td, th { border: 1px solid #555; padding: 5px; vertical-align: top; }
+    th { background: #222; }
+    textarea.small { width: 100%; height: 60px; }
+    #json { width: 100%; height: 400px; white-space: pre-wrap; overflow-x: auto; background: #000; color: #0f0; }
+    .btn-row { margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+<h2>🎞️ OXO Playlist Editor (con giorni personalizzati)</h2>
+
+<div class="btn-row">
+  <input type="file" id="fileInput" accept=".html" onchange="loadIndex()">
+  <button onclick="loadIndex()">📥 Importa index.html</button>
+</div>
+
+<div class="btn-row">
+  <input type="text" id="newDay" placeholder="AAAA-MM-GG o 1–7">
+  <button onclick="addDay()">➕ Aggiungi giorno</button>
+</div>
+
+<div id="tableContainer"></div>
+
+<h3>📦 Schedule JSON completo</h3>
+<textarea id="json" readonly></textarea>
+<br>
+<div class="btn-row">
+  <button onclick="downloadSchedule()">💾 Scarica solo JSON</button>
+  <button onclick="exportIndex()">🚀 Esporta nuovo index.html</button>
+</div>
+
+<pre id="output" style="white-space: pre-wrap; color: #ff8080;"></pre>
+
+<script>
+  let originalHTML = '';
+
+  function loadIndex() {
+    const input = document.getElementById('fileInput');
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      originalHTML = e.target.result;
+      const match = originalHTML.match(/const schedule\s*=\s*(\{[\s\S]*?\});/);
+      if (match) {
+        try {
+          const clean = match[1].replace(/,\s*}/g, '}');
+          const obj = JSON.parse(clean);
+          document.getElementById('json').value = JSON.stringify(obj, null, 2);
+          buildTableFromJSON(obj);
+          output.innerText = "✅ JSON caricato.";
+        } catch (err) {
+          output.innerText = "❌ Errore nel parsing: " + err.message;
+        }
+      } else {
+        output.innerText = "⚠️ Schedule non trovato nel file.";
+      }
+    };
+    if (input.files.length) reader.readAsText(input.files[0]);
+    else output.innerText = "📂 Nessun file selezionato.";
+  }
+
+  let scheduleData = {};
+
+  function buildTableFromJSON(data) {
+    scheduleData = data;
+    const container = document.getElementById('tableContainer');
+    const sections = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
+    const giorni = Object.keys(data);
+    let html = "<table><tr><th>Giorno</th>" + sections.map(s => `<th>${s}</th>`).join('') + "</tr>";
+
+    giorni.forEach(day => {
+      html += `<tr><td>${day}</td>`;
+      sections.forEach(sec => {
+        const val = (data[day] && data[day][sec]) ? data[day][sec].join(", ") : "";
+        html += `<td><textarea class="small" id="d${day}_${sec}" oninput="updateFromTable()">${val}</textarea></td>`;
+      });
+      html += "</tr>";
+    });
+
+    html += "</table>";
+    container.innerHTML = html;
+  }
+
+  function updateFromTable() {
+    const sections = ["Happy_Hour", "Standard_1", "DJ", "Standard_2"];
+    const rows = document.querySelectorAll("#tableContainer table tr");
+    const data = {};
+
+    rows.forEach((row, i) => {
+      if (i === 0) return;
+      const cells = row.querySelectorAll("td");
+      const day = cells[0].innerText.trim();
+      data[day] = {};
+      sections.forEach((sec, j) => {
+        const textarea = cells[j + 1].querySelector("textarea");
+        const val = textarea.value.trim();
+        data[day][sec] = val ? val.split(",").map(s => s.trim()).filter(Boolean) : [];
+      });
+    });
+
+    scheduleData = data;
+    document.getElementById('json').value = JSON.stringify(data, null, 2);
+  }
+
+  function addDay() {
+    const day = document.getElementById('newDay').value.trim();
+    if (day && !scheduleData[day]) {
+      scheduleData[day] = {
+        "Happy_Hour": [],
+        "Standard_1": [],
+        "DJ": [],
+        "Standard_2": []
+      };
+      buildTableFromJSON(scheduleData);
+      updateFromTable();
+      document.getElementById('newDay').value = "";
+    } else {
+      output.innerText = "⚠️ Giorno già presente o non valido.";
+    }
+  }
+
+  function downloadSchedule() {
+    const text = document.getElementById('json').value;
+    const blob = new Blob([text], { type: "application/json" });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = "schedule.json";
+    a.click();
+  }
+
+  function exportIndex() {
+    try {
+      const newJSON = document.getElementById('json').value;
+      JSON.parse(newJSON);
+      const newSchedule = `const schedule = ${newJSON};`;
+      const replaced = originalHTML.replace(/const schedule\s*=\s*\{[\s\S]*?\};/, newSchedule);
+      const blob = new Blob([replaced], { type: "text/html" });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "index.html";
+      a.click();
+      output.innerText = "✅ Nuovo index.html generato!";
+    } catch (e) {
+      output.innerText = "❌ Errore: " + e.message;
+    }
+  }
+</script>
+
+</body>
+</html>
