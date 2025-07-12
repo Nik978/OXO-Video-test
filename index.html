@@ -13,7 +13,7 @@
       top: 15px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 5vw;
+      font-size: 4vw;
       font-weight: bold;
       color: #FFFFFF;
       display: none;
@@ -22,8 +22,8 @@
     #countdownFootball {
       position: absolute;
       top: 15px;
-      left: 30%;
-      font-size: 4vw;
+      right: 28%;
+      font-size: 3vw;
       font-weight: bold;
       color: #FFD700;
       display: none;
@@ -33,11 +33,10 @@
       position: absolute;
       bottom: 10px;
       left: 10px;
-      color: white;
+      color: #FFFFFF;
       font-size: 2em;
       font-weight: bold;
       white-space: pre-line;
-    
     }
   </style>
 </head>
@@ -60,6 +59,7 @@ const countdownFootball = document.getElementById('countdownFootball');
 const debug = document.getElementById('debug');
 const versione = "TV";
 const dateStr = new Date().toISOString().split("T")[0];
+
 const schedule = {
   "1": {
     "Happy_Hour": [],
@@ -128,10 +128,10 @@ const schedule = {
   "6": {
     "Happy_Hour": [
       "Intro.mp4",
-      "Cosplay.mp4",
+      "Happy.mp4",
       "Cosplay.mp4",
       "Bucket.mp4",
-      "Happy.mp4",
+      "Cosplay.mp4",
       "Happy.mp4"
     ],
     "Standard_1": [
@@ -199,7 +199,7 @@ const schedule = {
       "Cosplay.mp4"
     ]
   },
-  "2025-07-09": {
+  "2025-07-13": {
     "Happy_Hour": [
       "Happy.mp4",
       "Football.mp4",
@@ -238,8 +238,49 @@ const schedule = {
       "Cosplay.mp4",
       "Football.mp4"
     ]
+  },
+  "2025-07-12": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Football.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4",
+      "Football.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Football.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4",
+      "Football.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Football.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4",
+      "Football.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Football.mp4",
+      "Cosplay.mp4",
+      "Bucket.mp4",
+      "Football.mp4",
+      "Cosplay.mp4",
+      "Happy.mp4"
+    ]
   }
-};
+}; // fine schedule
+
+// ---- Fine JSON parsing ----
 
 const base = "TV/";
 const videoMap = {};
@@ -277,24 +318,13 @@ let playlist = [];
 let countdownTimer = null;
 
 function updateDebug(day, section, name) {
-  let dayLabel;
-
-  if (schedule[dateStr]) {
-    dayLabel = `Specific ${dateStr}`;
-  } else if (schedule[day] && Object.values(schedule[day]).some(arr => arr.length > 0)) {
-    dayLabel = `Day ${day}`;
-  } else {
-    dayLabel = `Day ${day} Default`;
-  }
-
   debug.innerText =
     `🕒 Time: ${new Date().toLocaleTimeString()}\n` +
-    `📅 Sheduled day: ${dayLabel}\n` +
-    `🎯 Sheduled Section: ${section}\n` +
+    `📅 Day schedule: ${schedule[dateStr] ? 'Specific ' + dateStr : 'Default'}\n` +
+    `🎯 Section schedule: ${section}\n` +
     `🎞️ Video clip: ${name}\n` +
     `📦 Version: ${versione}`;
 }
-
 
 function updateCountdown(element, targetHour) {
   const now = new Date();
@@ -313,8 +343,8 @@ function updateCountdown(element, targetHour) {
 function isHappyCountdownActive(min) {
   return min >= 1140 && min < 1260; // 19:00–21:00
 }
-function isFootballCountdownActive(min) {
-  return (min >= 1140 || min < 120); // 19:00–02:00
+function isFootballCountdownActive(min, currentDateStr) {
+  return currentDateStr === "2025-07-13" && (min >= 1140 || min < 120); // 19:00–02:00 solo il 13 luglio 2025
 }
 
 function playNext() {
@@ -362,7 +392,7 @@ function playNext() {
     countdownHappy.style.display = "block";
     updateCountdown(countdownHappy, 21);
     countdownTimer = setInterval(() => updateCountdown(countdownHappy, 21), 1000);
-  } else if (name.includes("Football") && isFootballCountdownActive(min)) {
+  } else if (name.includes("Football") && isFootballCountdownActive(min, dateStr)) {
     countdownFootball.style.display = "block";
     updateCountdown(countdownFootball, 2);
     countdownTimer = setInterval(() => updateCountdown(countdownFootball, 2), 1000);
