@@ -277,13 +277,24 @@ let playlist = [];
 let countdownTimer = null;
 
 function updateDebug(day, section, name) {
+  let dayLabel;
+
+  if (schedule[dateStr]) {
+    dayLabel = `Specific ${dateStr}`;
+  } else if (schedule[day] && Object.values(schedule[day]).some(arr => arr.length > 0)) {
+    dayLabel = `Day ${day}`;
+  } else {
+    dayLabel = `Day ${day} Default`;
+  }
+
   debug.innerText =
     `🕒 Time: ${new Date().toLocaleTimeString()}\n` +
-    `📅 Day schedule: ${schedule[dateStr] ? 'Specific ' + dateStr : 'Default'}\n` +
-    `🎯 Section schedule: ${section}\n` +
+    `📅 Sheduled day: ${dayLabel}\n` +
+    `🎯 Sheduled Section: ${section}\n` +
     `🎞️ Video clip: ${name}\n` +
     `📦 Version: ${versione}`;
 }
+
 
 function updateCountdown(element, targetHour) {
   const now = new Date();
