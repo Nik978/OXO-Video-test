@@ -51,18 +51,14 @@
       transition: opacity 0.8s ease-in-out; /* tua transizione */
       z-index: 10;
     }
-  </style>
+ </style>
+
 </head>
 <body>
 
 <div id="overlayFade"></div>
 
-<!-- FRONT video (visibile) -->
 <video id="video" autoplay muted playsinline></video>
-<!-- BACK video (precarico) -->
-<video id="videoNext" autoplay muted playsinline style="display:none"></video>
-
-<!-- Logo/idle -->
 <video id="logoVideo" autoplay muted loop playsinline style="display: none;">
   <source src="TV/logo.mp4" type="video/mp4">
 </video>
@@ -72,6 +68,15 @@
 <div id="debug"></div>
 
 <script>
+const video = document.getElementById('video');
+const logoVideo = document.getElementById('logoVideo');
+const countdownHappy = document.getElementById('countdownHappy');
+const countdownFootball = document.getElementById('countdownFootball');
+const debug = document.getElementById('debug');
+const versione = "TV";
+const dateStr = new Date().toISOString().split("T")[0];
+
+
 /* ====================== SCHEDULE INLINE (come prima) ====================== */
 /* Sostituisci pure questo oggetto con il tuo lungo identico 1:1 */
 const schedule = {
