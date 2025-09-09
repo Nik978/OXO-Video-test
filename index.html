@@ -993,7 +993,10 @@ window.addEventListener('load', () => {
   Non tocchiamo le tue funzioni: rimuoviamo solo il listener 'ended' e mettiamo il nostro.
 */
 
-// 1) Crea il buffer video nascosto
+<script>
+// === SEAMLESS ADDON (patch listener su entrambi i video) ===
+
+// 1) Crea buffer
 const videoNext = document.createElement('video');
 videoNext.setAttribute('autoplay','');
 videoNext.setAttribute('muted','');
@@ -1001,8 +1004,8 @@ videoNext.setAttribute('playsinline','');
 videoNext.style.display = 'none';
 document.body.appendChild(videoNext);
 
-// 2) Stato front/back (front = tuo #video)
-let front = video;
+// 2) Stato front/back
+let front = video;       // tuo #video
 let back  = videoNext;
 let swapping = false;
 
@@ -1025,48 +1028,60 @@ function preloadInto(videoEl, src){
   });
 }
 
-// 4) Calcolo del “prossimo” clip con il tuo stato corrente
+// 4) Listener su ENTRAMBI i video
+function onTimeUpdateSwap(e){
+  const v = e.target;
+  if (!isFinite(v.duration) || v.duration <= 0) return;
+  const rem = v.duration - v.currentTime;
+  if (rem <= 1.00) seamlessSwap();
+}
+function attachSwapListeners(el){
+  el.removeEventListener('ended', seamlessSwap);
+  el.addEventListener('ended', seamlessSwap);
+
+  el.removeEventListener('timeupdate', onTimeUpdateSwap);
+  el.addEventListener('timeupdate', onTimeUpdateSwap);
+}
+attachSwapListeners(video);
+attachSwapListeners(videoNext);
+
+// 5) Calcolo prossimo clip
 function computeNextSrcAndName() {
   const { day, section } = getDayAndSection();
   const today = schedule[dateStr] || schedule[day] || schedule["default"];
   let list = today && today[section];
   if (!list || list.length === 0) list = (schedule["default"] && schedule["default"][section]) || [];
   if (!list || !list.length) return { name:null, src:null, list:[] };
-  const name = list[current % list.length];      // usa il tuo indice current (già avanzato in playNext)
+  const name = list[current % list.length];
   const src  = videoMap[name];
   return { name, src, list };
 }
 
-// 5) Precarica subito il prossimo appena parte un clip
+// 6) Precarico
 function queuePreloadNext(){
   const nxt = computeNextSrcAndName();
   if (!nxt.src) return;
   preloadInto(back, nxt.src)
     .then(()=>{ back.dataset.name = nxt.name; })
-    .catch(()=>{ /* se fallisce, riproveremo al prossimo ciclo */ });
+    .catch(()=>{ /* retry al prossimo giro */ });
 }
 
-// 6) Swap seamless durante il fade (sostituisce la tua fadeToNext a livello di listener)
+// 7) Swap con fade (non tocca le tue funzioni)
 function seamlessSwap(){
   if (swapping) return;
   swapping = true;
   overlay.style.opacity = "1";
   setTimeout(() => {
-    // if back non pronto, fallback alla tua playNext()
     if (!back.src) { swapping = false; overlay.style.opacity="0"; playNext(); return; }
 
-    // Avvia il buffer
     back.currentTime = 0;
     safePlay(back);
 
-    // Nascondi front, mostra back
     front.pause(); front.style.display = "none";
     back.style.display = "block";
 
-    // Swap riferimenti
     const tmp = front; front = back; back = tmp;
 
-    // Aggiorna debug/countdown sul nuovo clip
     const { day, min, section } = getDayAndSection();
     const playingName = front.dataset.name || front.currentSrc.split('/').pop();
     updateDebug(day, section, playingName);
@@ -1084,33 +1099,21 @@ function seamlessSwap(){
       countdownTimer = setInterval(() => updateCountdown(countdownFootball, 2), 1000);
     }
 
-    // Precarica il successivo (post-swap incrementiamo current come nel tuo playNext)
-    current++;
-    queuePreloadNext();
+    current++;           // avanzamento come nel tuo playNext
+    queuePreloadNext();  // prepara il successivo
 
     overlay.style.opacity = "0";
     swapping = false;
-  }, 1000); // stesso tempo del tuo fade
+  }, 1000);
 }
 
-// 7) Disinnesca il listener 'ended' originale e usa il nostro
+// 8) Usa i nostri listener (non quello originale)
 video.removeEventListener('ended', fadeToNext);
-video.addEventListener('ended', seamlessSwap);
 
-// 8) In più, fai lo swap poco prima della fine (se la TV non emette 'ended' in tempo)
-video.addEventListener('timeupdate', () => {
-  if (!isFinite(front.duration) || front.duration <= 0) return;
-  const rem = front.duration - front.currentTime;
-  if (rem <= 1.00) seamlessSwap();
-});
-
-// 9) Dopo l’avvio iniziale (playNext), accoda subito il preload del prossimo
+// 9) Dopo l'avvio iniziale, fai partire subito il preload del “prossimo”
 window.addEventListener('load', () => {
-  // diamo mezzo secondo al primo clip per avviarsi, poi pre-carichiamo il prossimo
   setTimeout(queuePreloadNext, 600);
 });
 </script>
-<!-- ================== FINE SEAMLESS ADDON ================== -->
 
-</body>
 </html>
