@@ -66,73 +66,1074 @@
 <div id="countdownFootball"></div>
 <div id="debug"></div>
 
+<!-- ===================== TUO SCRIPT ORIGINALE (IDENTICO) ===================== -->
 <script>
-/* === IL TUO SCRIPT ORIGINALE QUI (schedule, playNext, fadeToNext, ecc.) === */
-/* NON MODIFICATO */
+const video = document.getElementById('video');
+const logoVideo = document.getElementById('logoVideo');
+const countdownHappy = document.getElementById('countdownHappy');
+const countdownFootball = document.getElementById('countdownFootball');
+const debug = document.getElementById('debug');
+const versione = "TV";
+const dateStr = new Date().toISOString().split("T")[0];
+
+const schedule = {
+  "1": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "2": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "3": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "4": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo3.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Oxo3.mp4"
+    ]
+  },
+  "5": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "6": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Bucket.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ]
+  },
+  "7": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
+  },
+  "default": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Bucket.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Bucket.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Bucket.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo3.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo3.mp4"
+    ]
+  },
+  "2025-09-12": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Black.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Black.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Black.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Black.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Black.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Black.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Black.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Black.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "Black.mp4",
+      "Fang.mp4",
+      "Black.mp4",
+      "Pool.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Black.mp4",
+      "Bucket.mp4",
+      "Black.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ]
+  },
+  "2025-09-21": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Black.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "White.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "SM.mp4",
+      "Pool.mp4",
+      "SM.mp4",
+      "Bucket.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ]
+  },
+  "2025-09-14": {
+    "Happy_Hour": [
+      "Intro.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Oxo.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Oxo2.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Happy.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_1": [
+      "Intro.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ],
+    "DJ": [
+      "Intro.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ],
+    "Standard_2": [
+      "Intro.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "Oxo.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "Oxo2.mp4",
+      "Fang.mp4",
+      "Pool.mp4",
+      "Fang.mp4",
+      "SM.mp4",
+      "Fang.mp4",
+      "Bucket.mp4",
+      "Fang.mp4",
+      "Happy.mp4",
+      "Oxo3.mp4"
+    ]
+  }
+}; // fine schedule
+
+const base = "TV/";
+const videoMap = {};
+Object.values(schedule).forEach(day => {
+  Object.values(day).flat().forEach(name => {
+    if (!name) return;
+    videoMap[name] = (/^https?:\/\//i.test(name) || name.includes('/')) ? name : (base + name);
+  });
+});
+
+function getDayAndSection() {
+  const now = new Date();
+  let day = now.getDay();
+  if (day === 0) day = 7;
+
+  const h = now.getHours(), m = now.getMinutes();
+  const min = h * 60 + m;
+
+  if (min < 300) {
+    day -= 1;
+    if (day < 1) day = 7;
+  }
+
+  let section = "Closed";
+  if (min >= 1110 && min < 1260) section = "Happy_Hour";
+  else if (min >= 1260 && min < 1320) section = "Standard_1";
+  else if (min >= 1320 || min < 120) section = "DJ";
+  else if (min >= 120 && min < 300) section = "Standard_2";
+  else if (min >= 300 && min < 1110) section = "Closed";
+
+  return { day, min, section };
+}
+
+let current = 0;
+let playlist = [];
+let countdownTimer = null;
+
+function updateDebug(day, section, name) {
+  let dayLabel;
+
+  if (schedule[dateStr]) {
+    dayLabel = `Specific ${dateStr}`;
+  } else if (schedule[day] && Object.values(schedule[day]).some(arr => arr.length > 0)) {
+    dayLabel = `Day ${day}`;
+  } else {
+    dayLabel = `Day ${day} Default`;
+  }
+
+  debug.innerText =
+    `🕒 Time: ${new Date().toLocaleTimeString()}\n` +
+    `📅 Sheduled day: ${dayLabel}\n` +
+    `🎯 Sheduled Section: ${section}\n` +
+    `🎞️ Video clip: ${name}\n` +
+    `📦 Version: ${versione}`;
+}
+
+function updateCountdown(element, targetHour) {
+  const now = new Date();
+  const target = new Date();
+  target.setHours(targetHour, 0, 0, 0);
+  if (now > target) target.setDate(target.getDate() + 1);
+
+  const diff = target - now;
+  const h = Math.floor(diff / 1000 / 60 / 60);
+  const m = Math.floor((diff / 1000 / 60) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+
+  element.innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function isHappyCountdownActive(min) {
+  return min >= 1140 && min < 1260; // 19:00–21:00
+}
+function isFootballCountdownActive(min, currentDateStr) {
+  return currentDateStr === "2025-07-13" && (min >= 1140 || min < 120); // 19:00–02:00 solo il 13 luglio 2025
+}
+
+function playNext() {
+  const { day, min, section } = getDayAndSection();
+  const active = !(section === "Closed");
+
+  if (!active) {
+    video.pause();
+    video.style.display = "none";
+    logoVideo.style.display = "block";
+    logoVideo.play();
+    updateDebug(day, section, "-");
+    countdownHappy.style.display = "none";
+    countdownFootball.style.display = "none";
+    setTimeout(() => playNext(), 60000);
+    return;
+  }
+
+  logoVideo.pause();
+  logoVideo.style.display = "none";
+
+  const today = schedule[dateStr] || schedule[day] || schedule["default"];
+  playlist = today[section];
+  if (!playlist || playlist.length === 0) {
+    playlist = schedule["default"][section] || [];
+  }
+  if (playlist.length === 0) {
+    video.style.display = "none";
+    updateDebug(day, section, "No video");
+    return;
+  }
+
+  const name = playlist[current % playlist.length];
+  const src = videoMap[name];
+  video.src = src;
+  video.style.display = "block";
+  video.play();
+  updateDebug(day, section, name);
+
+  clearInterval(countdownTimer);
+  countdownHappy.style.display = "none";
+  countdownFootball.style.display = "none";
+
+  if (name.includes("Happy") && isHappyCountdownActive(min)) {
+    countdownHappy.style.display = "block";
+    updateCountdown(countdownHappy, 21);
+    countdownTimer = setInterval(() => updateCountdown(countdownHappy, 21), 1000);
+  } else if (name.includes("Football") && isFootballCountdownActive(min, dateStr)) {
+    countdownFootball.style.display = "block";
+    updateCountdown(countdownFootball, 2);
+    countdownTimer = setInterval(() => updateCountdown(countdownFootball, 2), 1000);
+  }
+
+  current++;
+}
+
+const overlay = document.getElementById("overlayFade");
+
+function fadeToNext() {
+  overlay.style.opacity = "1";
+  setTimeout(() => {
+    playNext();
+    overlay.style.opacity = "0";
+  }, 1000); // tempo per la dissolvenza nera
+}
+
+video.addEventListener('ended', fadeToNext);
+
+window.addEventListener('load', () => {
+  overlay.style.opacity = "1";
+  setTimeout(() => {
+    playNext();
+    overlay.style.opacity = "0";
+  }, 500);
+});
 </script>
+<!-- =================== FINE TUO SCRIPT ORIGINALE =================== -->
 
-<!-- ========== ADDON SEAMLESS (fuori dallo script originale) ========== -->
+
+<!-- =================== ADDON SEAMLESS (SEPARATO) =================== -->
 <script>
-(function(){
-  const front = document.getElementById("video");
-  const back  = document.createElement("video");
-  back.autoplay = true;
-  back.muted = true;
-  back.playsInline = true;
-  back.style.display = "none";
-  document.body.appendChild(back);
+/*
+  - NON modifica il tuo script: lavora "a lato".
+  - Usa un <video> nascosto (back) per precaricare il prossimo clip.
+  - Al termine del clip corrente fa uno swap durante il tuo fade nero.
+  - Per rimanere allineato alla tua logica, incrementa `current` nello swap (come farebbe playNext).
+*/
 
+(function(){
+  const frontEl = document.getElementById('video');
+  const overlayEl = document.getElementById('overlayFade');
+
+  // Crea il buffer (back)
+  const backEl = document.createElement('video');
+  backEl.autoplay = true;
+  backEl.muted = true;
+  backEl.playsInline = true;
+  backEl.style.display = 'none';
+  document.body.appendChild(backEl);
+
+  let front = frontEl; // elemento "in onda"
+  let back  = backEl;  // elemento "in preload"
   let swapping = false;
 
-  // Precarica il prossimo video quando quello davanti inizia
-  front.addEventListener("playing", () => {
-    try {
-      const { day, min, section } = getDayAndSection();
-      const today = schedule[dateStr] || schedule[day] || schedule["default"];
-      const list = today?.[section] || schedule["default"]?.[section] || [];
-      if (list.length > 0) {
-        const nextName = list[current % list.length];
-        const src = videoMap[nextName];
-        back.src = src;
-        back.load();
-        back.dataset.name = nextName;
-      }
-    } catch(e){}
-  });
+  function safePlay(v){ const p=v.play?.(); if (p && p.catch) p.catch(()=>{}); }
 
-  // Intercetta lo swap al posto di playNext
-  front.removeEventListener("ended", fadeToNext);
-  front.addEventListener("ended", () => {
+  function computeNext(){
+    const now = new Date();
+    const ds = now.toISOString().split("T")[0];
+    const { day, section } = getDayAndSection();
+    const today = schedule[ds] || schedule[day] || schedule["default"];
+    let list = today && today[section];
+    if (!list || list.length === 0) list = (schedule["default"] && schedule["default"][section]) || [];
+    if (!list || !list.length) return {name:null, src:null};
+    const name = list[current % list.length];
+    const src  = videoMap[name];
+    return {name, src};
+  }
+
+  function preloadNextIntoBack(){
+    try{
+      const nxt = computeNext();
+      if (!nxt.src) return;
+      back.preload = 'auto';
+      back.src = nxt.src;
+      back.load();
+      back.dataset.name = nxt.name;
+    }catch{}
+  }
+
+  function onFrontPlaying(){
+    // appena il clip corrente è partito, precarica il prossimo
+    preloadNextIntoBack();
+  }
+
+  function onTimeUpdateSwap(e){
+    const v = e.target;
+    if (!isFinite(v.duration) || v.duration <= 0) return;
+    const rem = v.duration - v.currentTime;
+    if (rem <= 1.00) seamlessSwap(); // trigger un attimo prima della fine
+  }
+
+  function attachListeners(el){
+    el.removeEventListener('ended', seamlessSwap);
+    el.addEventListener('ended', seamlessSwap);
+    el.removeEventListener('timeupdate', onTimeUpdateSwap);
+    el.addEventListener('timeupdate', onTimeUpdateSwap);
+  }
+
+  function seamlessSwap(){
     if (swapping) return;
     swapping = true;
-    const overlay = document.getElementById("overlayFade");
-    overlay.style.opacity = "1";
 
+    overlayEl.style.opacity = '1';
     setTimeout(() => {
-      if (!back.src) {
-        // fallback se non c'è buffer
-        overlay.style.opacity = "0";
+      try{
+        if (!back.src) {
+          // se non è pronto, usa il tuo flusso standard
+          swapping = false;
+          overlayEl.style.opacity = '0';
+          return fadeToNext();
+        }
+
+        // Avvia il buffer e mostra
+        back.currentTime = 0;
+        safePlay(back);
+        front.pause();
+        front.style.display = 'none';
+        back.style.display  = 'block';
+
+        // Scambia i ruoli
+        [front, back] = [back, front];
+
+        // *** allinea l'indice come farebbe playNext() ***
+        current++;
+
+        // Aggiorna debug/countdown come fai già tu
+        try{
+          const ds = new Date().toISOString().split("T")[0];
+          const { day, min, section } = getDayAndSection();
+          const playingName = front.dataset.name || front.currentSrc.split('/').pop();
+          updateDebug(day, section, playingName);
+          clearInterval(countdownTimer);
+          countdownHappy.style.display = "none";
+          countdownFootball.style.display = "none";
+          if (playingName && isHappyCountdownActive(min)) {
+            countdownHappy.style.display = "block";
+            updateCountdown(countdownHappy, 21);
+            countdownTimer = setInterval(() => updateCountdown(countdownHappy, 21), 1000);
+          } else if (playingName && isFootballCountdownActive(min, ds)) {
+            countdownFootball.style.display = "block";
+            updateCountdown(countdownFootball, 2);
+            countdownTimer = setInterval(() => updateCountdown(countdownFootball, 2), 1000);
+          }
+        }catch{}
+
+        // Precarica il prossimo sul nuovo "back"
+        preloadNextIntoBack();
+
+      } finally {
+        overlayEl.style.opacity = '0';
         swapping = false;
-        return fadeToNext();
       }
+    }, 1000); // stesso tempo del tuo fade
+  }
 
-      // swap vero e proprio
-      back.currentTime = 0;
-      back.style.display = "block";
-      back.play().catch(()=>{});
-      front.style.display = "none";
+  // 1) rimuovi il listener originale sul tuo <video> (evita doppio trigger)
+  frontEl.removeEventListener('ended', fadeToNext);
 
-      // scambia i ruoli
-      const tmp = front.src;
-      front.src = back.src;
-      back.src = tmp;
+  // 2) metti i listener di seamless su ENTRAMBI i player
+  attachListeners(frontEl);
+  attachListeners(backEl);
 
-      overlay.style.opacity = "0";
-      swapping = false;
-    }, 800);
+  // 3) precarica il prossimo quando parte il clip corrente
+  frontEl.addEventListener('playing', onFrontPlaying);
+
+  // 4) se vuoi più margine, puoi anche precaricare dopo il boot (facoltativo)
+  window.addEventListener('load', () => {
+    setTimeout(preloadNextIntoBack, 700);
   });
 })();
 </script>
+<!-- =================== FINE ADDON SEAMLESS =================== -->
 
 </body>
 </html>
