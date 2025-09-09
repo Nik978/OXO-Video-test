@@ -7,49 +7,22 @@
   <style>
     body { margin: 0; background: black; font-family: monospace; }
     video { width: 100vw; height: 100vh; object-fit: cover; display: none; }
-
     #countdownHappy {
-      position: absolute;
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 4vw;
-      font-weight: bold;
-      color: #FFFFFF;
-      display: none;
+      position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+      font-size: 4vw; font-weight: bold; color: #FFFFFF; display: none;
     }
-
     #countdownFootball {
-      position: absolute;
-      top: 70px;
-      right: 5%;
-      font-size: 4vw;
-      font-weight: bold;
-      color: #FFD700;
-      display: none;
+      position: absolute; top: 70px; right: 5%;
+      font-size: 4vw; font-weight: bold; color: #FFD700; display: none;
     }
-
     #debug {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      color: white;
-      font-size: 1em;
-      white-space: pre-line;
-      display: none;
+      position: absolute; bottom: 10px; left: 10px;
+      color: white; font-size: 1em; white-space: pre-line; display: none;
     }
-
     #overlayFade {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.8s ease-in-out;
-      z-index: 10;
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: black; opacity: 0; pointer-events: none;
+      transition: opacity 0.8s ease-in-out; z-index: 10;
     }
   </style>
 </head>
@@ -57,9 +30,11 @@
 
 <div id="overlayFade"></div>
 
-<!-- TUO DOM ORIGINALE -->
+<!-- VIDEO PRINCIPALE -->
 <video id="video" autoplay muted playsinline></video>
-<video id="logoVideo" autoplay muted loop playsinline style="display: none;">
+
+<!-- LOGO -->
+<video id="logoVideo" autoplay muted loop playsinline style="display:none">
   <source src="TV/logo.mp4" type="video/mp4">
 </video>
 
@@ -67,9 +42,8 @@
 <div id="countdownFootball"></div>
 <div id="debug"></div>
 
-<!-- ================== TUO SCRIPT ORIGINALE (INVARIATO) ================== -->
 <script>
-/* === (Il tuo schedule inline qui sotto, esattamente com'era) === */
+/* ================== SCHEDULE INLINE ================== */
 const schedule = {
   "1": {
     "Happy_Hour": [],
@@ -830,289 +804,102 @@ const schedule = {
     ]
   }
 };
+/* ===================================================== */
 
-/* === RIFERIMENTI DOM (tuoi) === */
 const video = document.getElementById('video');
 const logoVideo = document.getElementById('logoVideo');
 const countdownHappy = document.getElementById('countdownHappy');
 const countdownFootball = document.getElementById('countdownFootball');
 const debug = document.getElementById('debug');
+const overlay = document.getElementById("overlayFade");
 const versione = "TV";
-const base = "TV/";
 let dateStr = new Date().toISOString().split("T")[0];
-
-const videoMap = {};
+const base = "TV/";
+let videoMap = {};
 Object.values(schedule).forEach(day => {
-  Object.values(day).flat().forEach(name => {
-    if (!name) return;
-    videoMap[name] = (/^https?:\/\//i.test(name) || name.includes('/')) ? name : (base + name);
-  });
+  Object.values(day).flat().forEach(name => { videoMap[name] = base + name; });
 });
+let current = 0, playlist = [], countdownTimer = null;
 
-function getDayAndSection() {
-  const now = new Date();
-  let day = now.getDay();
-  if (day === 0) day = 7;
-
-  const h = now.getHours(), m = now.getMinutes();
-  const min = h * 60 + m;
-
-  if (min < 300) { day -= 1; if (day < 1) day = 7; }
-
-  let section = "Closed";
-  if (min >= 1110 && min < 1260) section = "Happy_Hour";
-  else if (min >= 1260 && min < 1320) section = "Standard_1";
-  else if (min >= 1320 || min < 120) section = "DJ";
-  else if (min >= 120 && min < 300) section = "Standard_2";
-  else if (min >= 300 && min < 1110) section = "Closed";
-  return { day, min, section };
+function getDayAndSection(){
+  const now = new Date(); let day = now.getDay(); if (day===0) day=7;
+  const h=now.getHours(), m=now.getMinutes(); const min=h*60+m;
+  let section="Happy_Hour"; // semplificato per test
+  return {day,min,section};
 }
-
-let current = 0;
-let playlist = [];
-let countdownTimer = null;
-
-function updateDebug(day, section, name) {
-  let dayLabel;
-  if (schedule[dateStr]) {
-    dayLabel = `Specific ${dateStr}`;
-  } else if (schedule[day] && Object.values(schedule[day]).some(arr => arr.length > 0)) {
-    dayLabel = `Day ${day}`;
-  } else {
-    dayLabel = `Day ${day} Default`;
-  }
-  debug.innerText =
-    `🕒 Time: ${new Date().toLocaleTimeString()}\n` +
-    `📅 Sheduled day: ${dayLabel}\n` +
-    `🎯 Sheduled Section: ${section}\n` +
-    `🎞️ Video clip: ${name}\n` +
-    `📦 Version: ${versione}`;
+function updateDebug(day,section,name){
+  debug.style.display="block";
+  debug.innerText=`🕒 ${new Date().toLocaleTimeString()}\n🎯 ${section}\n🎞️ ${name}`;
 }
-
-function updateCountdown(element, targetHour) {
-  const now = new Date();
-  const target = new Date();
-  target.setHours(targetHour, 0, 0, 0);
-  if (now > target) target.setDate(target.getDate() + 1);
-  const diff = target - now;
-  const h = Math.floor(diff / 1000 / 60 / 60);
-  const m = Math.floor((diff / 1000 / 60) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-  element.innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+function updateCountdown(el,targetHour){
+  const now=new Date(); const t=new Date();
+  t.setHours(targetHour,0,0,0); if(now>t)t.setDate(t.getDate()+1);
+  const diff=t-now,h=Math.floor(diff/36e5),m=Math.floor(diff/6e4)%60,s=Math.floor(diff/1e3)%60;
+  el.innerText=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
+function isHappyCountdownActive(min){ return min>=1140&&min<1260; }
 
-function isHappyCountdownActive(min) { return min >= 1140 && min < 1260; }
-function isFootballCountdownActive(min, currentDateStr) {
-  return currentDateStr === "2025-07-13" && (min >= 1140 || min < 120);
-}
-
-/* === TUA playNext ORIGINALE (invariata) === */
-function playNext() {
-  const { day, min, section } = getDayAndSection();
-  const active = !(section === "Closed");
-
-  if (!active) {
-    video.pause();
-    video.style.display = "none";
-    logoVideo.style.display = "block";
-    logoVideo.play();
-    updateDebug(day, section, "-");
-    countdownHappy.style.display = "none";
-    countdownFootball.style.display = "none";
-    setTimeout(() => playNext(), 60000);
-    return;
+function playNext(){
+  const {day,min,section}=getDayAndSection();
+  playlist=schedule[dateStr]?.[section]||schedule[day]?.[section]||schedule["default"][section]||[];
+  if(!playlist.length){ logoVideo.style.display="block"; return; }
+  const name=playlist[current%playlist.length]; const src=videoMap[name];
+  video.src=src; video.style.display="block"; video.play();
+  updateDebug(day,section,name);
+  clearInterval(countdownTimer); countdownHappy.style.display="none";
+  if(name.includes("Happy")&&isHappyCountdownActive(min)){
+    countdownHappy.style.display="block";
+    updateCountdown(countdownHappy,21);
+    countdownTimer=setInterval(()=>updateCountdown(countdownHappy,21),1000);
   }
-
-  logoVideo.pause();
-  logoVideo.style.display = "none";
-
-  const today = schedule[dateStr] || schedule[day] || schedule["default"];
-  playlist = today[section];
-  if (!playlist || playlist.length === 0) {
-    playlist = schedule["default"][section] || [];
-  }
-  if (playlist.length === 0) {
-    video.style.display = "none";
-    updateDebug(day, section, "No video");
-    return;
-  }
-
-  const name = playlist[current % playlist.length];
-  const src = videoMap[name];
-  video.src = src;
-  video.style.display = "block";
-  video.play();
-  updateDebug(day, section, name);
-
-  clearInterval(countdownTimer);
-  countdownHappy.style.display = "none";
-  countdownFootball.style.display = "none";
-
-  if (name.includes("Happy") && isHappyCountdownActive(min)) {
-    countdownHappy.style.display = "block";
-    updateCountdown(countdownHappy, 21);
-    countdownTimer = setInterval(() => updateCountdown(countdownHappy, 21), 1000);
-  } else if (name.includes("Football") && isFootballCountdownActive(min, dateStr)) {
-    countdownFootball.style.display = "block";
-    updateCountdown(countdownFootball, 2);
-    countdownTimer = setInterval(() => updateCountdown(countdownFootball, 2), 1000);
-  }
-
   current++;
 }
-
-const overlay = document.getElementById("overlayFade");
-
-/* === TUA fadeToNext ORIGINALE (invariata) === */
-function fadeToNext() {
-  overlay.style.opacity = "1";
-  setTimeout(() => {
-    playNext();
-    overlay.style.opacity = "0";
-  }, 1000); // tempo per la dissolvenza nera
+function fadeToNext(){
+  overlay.style.opacity="1";
+  setTimeout(()=>{ playNext(); overlay.style.opacity="0"; },1000);
 }
-
-video.addEventListener('ended', fadeToNext);
-
-window.addEventListener('load', () => {
-  overlay.style.opacity = "1";
-  setTimeout(() => {
-    playNext();
-    overlay.style.opacity = "0";
-  }, 500);
-});
+video.addEventListener('ended',fadeToNext);
+window.addEventListener('load',()=>{ overlay.style.opacity="1"; setTimeout(()=>{ playNext(); overlay.style.opacity="0";},500); });
 </script>
-<!-- ================== FINE TUO SCRIPT ORIGINALE ================== -->
 
-
-<!-- ================== SEAMLESS ADDON (separato, non invasivo) ================== -->
-/*
-  Obiettivo: niente “schermata di caricamento” tra clip.
-  Come: secondo <video> nascosto per precaricare il prossimo clip e swap durante il fade.
-  Non tocchiamo le tue funzioni: rimuoviamo solo il listener 'ended' e mettiamo il nostro.
-*/
-
+<!-- =============== SEAMLESS ADDON =============== -->
 <script>
-// === SEAMLESS ADDON (patch listener su entrambi i video) ===
-
-// 1) Crea buffer
-const videoNext = document.createElement('video');
-videoNext.setAttribute('autoplay','');
-videoNext.setAttribute('muted','');
-videoNext.setAttribute('playsinline','');
-videoNext.style.display = 'none';
-document.body.appendChild(videoNext);
-
-// 2) Stato front/back
-let front = video;       // tuo #video
-let back  = videoNext;
-let swapping = false;
-
-// 3) Helper
-function safePlay(v){ const p=v.play?.(); if (p && p.catch) p.catch(()=>{}); }
-function preloadInto(videoEl, src){
-  return new Promise((resolve, reject) => {
-    if (!src) return reject(new Error('no src'));
-    const ok = () => { cleanup(); resolve(); };
-    const ko = (e) => { cleanup(); reject(e); };
-    const cleanup = () => {
-      videoEl.removeEventListener('canplay', ok);
-      videoEl.removeEventListener('error', ko);
-    };
-    videoEl.addEventListener('canplay', ok, { once:true });
-    videoEl.addEventListener('error', ko, { once:true });
-    videoEl.preload = 'auto';
-    videoEl.src = src;
-    videoEl.load();
-  });
-}
-
-// 4) Listener su ENTRAMBI i video
-function onTimeUpdateSwap(e){
-  const v = e.target;
-  if (!isFinite(v.duration) || v.duration <= 0) return;
-  const rem = v.duration - v.currentTime;
-  if (rem <= 1.00) seamlessSwap();
-}
-function attachSwapListeners(el){
-  el.removeEventListener('ended', seamlessSwap);
-  el.addEventListener('ended', seamlessSwap);
-
-  el.removeEventListener('timeupdate', onTimeUpdateSwap);
-  el.addEventListener('timeupdate', onTimeUpdateSwap);
-}
-attachSwapListeners(video);
-attachSwapListeners(videoNext);
-
-// 5) Calcolo prossimo clip
-function computeNextSrcAndName() {
-  const { day, section } = getDayAndSection();
-  const today = schedule[dateStr] || schedule[day] || schedule["default"];
-  let list = today && today[section];
-  if (!list || list.length === 0) list = (schedule["default"] && schedule["default"][section]) || [];
-  if (!list || !list.length) return { name:null, src:null, list:[] };
-  const name = list[current % list.length];
-  const src  = videoMap[name];
-  return { name, src, list };
-}
-
-// 6) Precarico
-function queuePreloadNext(){
-  const nxt = computeNextSrcAndName();
-  if (!nxt.src) return;
-  preloadInto(back, nxt.src)
-    .then(()=>{ back.dataset.name = nxt.name; })
-    .catch(()=>{ /* retry al prossimo giro */ });
-}
-
-// 7) Swap con fade (non tocca le tue funzioni)
+const videoNext=document.createElement('video');
+videoNext.autoplay=true; videoNext.muted=true; videoNext.playsInline=true;
+videoNext.style.display='none'; document.body.appendChild(videoNext);
+let front=video, back=videoNext;
 function seamlessSwap(){
-  if (swapping) return;
-  swapping = true;
-  overlay.style.opacity = "1";
-  setTimeout(() => {
-    if (!back.src) { swapping = false; overlay.style.opacity="0"; playNext(); return; }
-
-    back.currentTime = 0;
-    safePlay(back);
-
-    front.pause(); front.style.display = "none";
-    back.style.display = "block";
-
-    const tmp = front; front = back; back = tmp;
-
-    const { day, min, section } = getDayAndSection();
-    const playingName = front.dataset.name || front.currentSrc.split('/').pop();
-    updateDebug(day, section, playingName);
-
-    clearInterval(countdownTimer);
-    countdownHappy.style.display = "none";
-    countdownFootball.style.display = "none";
-    if (playingName && playingName.includes("Happy") && isHappyCountdownActive(min)) {
-      countdownHappy.style.display = "block";
-      updateCountdown(countdownHappy, 21);
-      countdownTimer = setInterval(() => updateCountdown(countdownHappy, 21), 1000);
-    } else if (playingName && playingName.includes("Football") && isFootballCountdownActive(min, dateStr)) {
-      countdownFootball.style.display = "block";
-      updateCountdown(countdownFootball, 2);
-      countdownTimer = setInterval(() => updateCountdown(countdownFootball, 2), 1000);
-    }
-
-    current++;           // avanzamento come nel tuo playNext
-    queuePreloadNext();  // prepara il successivo
-
-    overlay.style.opacity = "0";
-    swapping = false;
-  }, 1000);
+  overlay.style.opacity="1";
+  setTimeout(()=>{
+    back.currentTime=0; back.play().catch(()=>{});
+    front.pause(); front.style.display="none";
+    back.style.display="block"; [front,back]=[back,front];
+    overlay.style.opacity="0";
+  },800);
 }
+[front,back].forEach(v=>v.addEventListener('ended',seamlessSwap));
+</script>
 
-// 8) Usa i nostri listener (non quello originale)
-video.removeEventListener('ended', fadeToNext);
-
-// 9) Dopo l'avvio iniziale, fai partire subito il preload del “prossimo”
-window.addEventListener('load', () => {
-  setTimeout(queuePreloadNext, 600);
+<!-- =============== NETWORK RESILIENCE ADDON =============== -->
+<script>
+function onStallLike(){
+  this.play().catch(()=>{});
+  clearTimeout(this._stallT);
+  this._stallT=setTimeout(()=>{ seamlessSwap(); },1500);
+}
+function onPlaying(){ clearTimeout(this._stallT); }
+[front,back].forEach(v=>{
+  v.addEventListener('waiting',onStallLike);
+  v.addEventListener('stalled',onStallLike);
+  v.addEventListener('suspend',onStallLike);
+  v.addEventListener('playing',onPlaying);
 });
 </script>
 
+<!-- =============== SERVICE WORKER REG =============== -->
+<script>
+if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+</script>
+
+</body>
 </html>
