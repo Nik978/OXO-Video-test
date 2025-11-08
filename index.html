@@ -19,7 +19,7 @@
       display: none;
     }
 
-    #countdownFootball {
+   #countdownFootball {
       position: absolute;
       top: 70px;
       right: 5%;
@@ -33,10 +33,10 @@
       position: absolute;
       bottom: 10px;
       left: 10px;
-      color: #FFFFFF;
-      font-size: 2em;
-      font-weight: bold;
+      color: white;
+      font-size: 1em;
       white-space: pre-line;
+      display: none;
     }
 
 #overlayFade {
@@ -77,7 +77,6 @@ const debug = document.getElementById('debug');
 const versione = "TV";
 const dateStr = new Date().toISOString().split("T")[0];
 
-
 const schedule = {
   "1": {
     "Happy_Hour": [],
@@ -100,123 +99,32 @@ const schedule = {
   "4": {
     "Happy_Hour": [
       "Intro.mp4",
-      "Happy.mp4",
       "Bucket.mp4",
-      "H.mp4",
       "Bucket.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo.mp4",
       "Happy.mp4",
       "Bucket.mp4",
-      "H.mp4",
       "Bucket.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo3.mp4"
+      "Happy.mp4"
     ],
     "Standard_1": [
       "Intro.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
       "Bucket.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo3.mp4"
+      "Bucket.mp4"
     ],
     "DJ": [
       "Intro.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
       "Bucket.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo3.mp4"
+      "Bucket.mp4"
     ],
     "Standard_2": [
       "Intro.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
       "Bucket.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Oxo3.mp4"
+      "Bucket.mp4"
     ]
   },
   "5": {
@@ -241,20 +149,10 @@ const schedule = {
     "Happy_Hour": [
       "Intro.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Oxo.mp4",
       "Happy.mp4",
       "Bucket.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Oxo3.mp4"
+      "Happy.mp4"
     ],
     "Standard_1": [
       "Intro.mp4",
@@ -262,17 +160,8 @@ const schedule = {
       "Bucket.mp4",
       "Happy.mp4",
       "Bucket.mp4",
-      "Oxo.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Oxo3.mp4"
+      "Bucket.mp4"
     ],
     "DJ": [
       "Intro.mp4",
@@ -280,17 +169,8 @@ const schedule = {
       "Bucket.mp4",
       "Happy.mp4",
       "Bucket.mp4",
-      "Oxo.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Oxo3.mp4"
+      "Bucket.mp4"
     ],
     "Standard_2": [
       "Intro.mp4",
@@ -298,127 +178,18 @@ const schedule = {
       "Bucket.mp4",
       "Happy.mp4",
       "Bucket.mp4",
-      "Oxo.mp4",
       "Happy.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "Oxo3.mp4"
+      "Bucket.mp4"
     ]
   },
-  "2025-10-31": {
-    "Happy_Hour": [
-      "Intro.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Oxo.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Bucket.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "H.mp4",
-      "Oxo3.mp4"
-    ],
-    "Standard_1": [
-      "Intro.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Oxo.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Oxo3.mp4"
-    ],
-    "DJ": [
-      "Intro.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Oxo.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Oxo3.mp4"
-    ],
-    "Standard_2": [
-      "Intro.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Oxo.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Oxo2.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Happy.mp4",
-      "Bucket.mp4",
-      "H.mp4",
-      "Oxo3.mp4"
-    ]
+  "2025-07-28": {
+    "Happy_Hour": [],
+    "Standard_1": [],
+    "DJ": [],
+    "Standard_2": []
   }
 }; // fine schedule
+
 
 // ---- Fine JSON parsing ----
 
@@ -444,11 +215,11 @@ function getDayAndSection() {
   }
 
   let section = "Closed";
-  if (min >= 1110 && min < 1260) section = "Happy_Hour";
+  if (min >= 990 && min < 1260) section = "Happy_Hour";
   else if (min >= 1260 && min < 1320) section = "Standard_1";
   else if (min >= 1320 || min < 120) section = "DJ";
   else if (min >= 120 && min < 300) section = "Standard_2";
-  else if (min >= 300 && min < 1110) section = "Closed";
+  else if (min >= 300 && min < 990) section = "Closed";
 
   return { day, min, section };
 }
